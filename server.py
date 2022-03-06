@@ -21,7 +21,7 @@ def webhook():
     else:
         abort(400)
 
-@app.route('/github', methos = ['POST'])
+@app.route('/github', method = ['POST'])
 def api_gh_message():
     if request.headers['Content-Type']== 'application/json':
         return json.dumps(request.json)
