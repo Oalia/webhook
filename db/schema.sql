@@ -1,0 +1,22 @@
+
+DROP TABLE IF EXISTS posts;
+
+CREATE TABLE posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dir TEXT NOT NULL,
+    sym TEXT NOT NULL,
+    step int NOT NULL,
+    depth int NOT NULL,
+    entry_price real NOT NULL,
+);
+
+-- DROP TABLE IF EXISTS posts;
+-- dir, sym, step, depth, entry_price
+-- CREATE TABLE symbol (
+--     id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     direction TEXT NOT NULL,
+--     depth INTEGER,
+--     step INTEGER NOT NULL,
+-- );
