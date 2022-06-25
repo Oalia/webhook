@@ -57,4 +57,3 @@ print('Se ejecutó una venta por 0.01')
 mt5.order_send(request)
 
 
-def 

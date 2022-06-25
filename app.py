@@ -1,3 +1,6 @@
+from datetime import datetime
+from time import time
+from timeit import timeit
 from flask import Flask, request, abort, render_template
 from numpy import double
 from db import db as DB
@@ -27,25 +30,35 @@ CREATE TABLE posts (
 """
 @app.route('/webhooks', methods=['POST'])
 def webhook():
+    """
+    Example Message: DN 50 UK100
+    """
+    time_entry = datetime.now()
     webhook_message = (request.data)
     msg = webhook_message.decode(encoding='UTF-8').split(" ")
     dir = msg[0]
-    sym = msg[1]
-    # size = double(msg[2])
-    size = (msg[2])
+    sym = msg[2]
+    size = double(msg[1])
     print(msg, dir, size)
 
-    # current_trade = DB.get_current_trade(sym)
+    # close
 
-    # if current_trade != None:
-    #     cur_dir = current_trade['dir']
-    #     if cur_dir != dir:
-    #         TD.close_positions(sym, dir, size)
-    #         TD.enter_new_position(sym, dir, size)
-    #     else:
-    #         TD.update_position(dir, sym, current_trade['step'], current_trade['depth'], current_trade['entry_price'])
-    # else:
-    #     TD.enter_new_position(sym, dir, size)
+    current_trade = DB.get_current_trade(sym)
+    if current_trade != None:
+        cur_dir = current_trade['dir']
+        if cur_dir != dir:
+            # TD.close_half_cycle(sym, dir, size, "minus_step_one_buy")
+            # TD.enter_half_cycle(sym, dir, size, "minus_step_one_buy")
+
+            DB.register_closing_position(sym, dir)
+            # DB.register_new_trade(sym, dir, entry_price="", created=time_entry)
+        
+        else:
+            # print(current_trade['step'])
+            TD.update_position(dir, sym, current_trade['step'], current_trade['entry_price'])
+    else:
+        TD.enter_half_cycle(sym, dir, size, "minus_step_one_buy")
+        
     return ""
 
 if __name__ == '__main__':

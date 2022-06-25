@@ -2,13 +2,13 @@
 DROP TABLE IF EXISTS posts;
 
 CREATE TABLE posts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     dir TEXT NOT NULL,
     sym TEXT NOT NULL,
     step int NOT NULL,
-    depth int NOT NULL,
     entry_price real NOT NULL,
+    status TEXT 
 );
 
 -- DROP TABLE IF EXISTS posts;
