@@ -108,9 +108,10 @@ def order_sell(symbol = "USDJPY", lot = 0.01, magic_id=0000):
     print("order_sell: 1. order_sell(): by {} {} lots at {} with deviation={} points".format(symbol,lot,price,deviation));
     if result.retcode != mt5.TRADE_RETCODE_DONE:
         print("order_sell: 2. order_sell failed, retcode={}".format(result.retcode))
+        return None
         # request the result as a dictionary and display it element by element
     # TODO might want to email or text responsible person about the order results.
-    return result
+    return price
 
 def close_all(sym):
     check_closed = []
