@@ -77,14 +77,12 @@ def register_closing_position(sym, dir):
     x=conn.execute('''select last_insert_rowid()''')
     id=x.fetchone()[0]
     curr = conn.cursor()
-    # s = """UPDATE {0} SET order_status=1 WHERE ID={1}""".format(symbol_table['sym'])
-    # print(s, " reg_close_trade")
 
     sql = '''
             UPDATE {0} 
             SET order_status = ?, 
             WHERE ID =? '''.format(symbol_table['sym'])
-    curr.execute(sql, (1, str(id)))
+    curr.execute(sql, (str(1), str(id)))
     conn.commit()
     conn.close()
             
