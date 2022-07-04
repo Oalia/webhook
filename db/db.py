@@ -72,17 +72,15 @@ CREATE TABLE posts (
 # register_closing_position(sym, order_status = "closed")
 def register_closing_position(sym, dir):
     symbol_table = get_current_trade(sym)
-    conn = get_db_connection()
-
-    x=conn.execute('''select last_insert_rowid()''')
-    id=x.fetchone()[0]
+    conn = sqlite3.connect('db/database.db')
     curr = conn.cursor()
-
-    sql = '''
-            UPDATE {0} 
-            SET order_status = ?, 
-            WHERE ID =? '''.format(symbol_table['sym'])
-    curr.execute(sql, (str(1), str(id)))
+    x=curr.execute('''select MAX(ID) from {0};'''.format(sym))
+    id=x.fetchone()[0]
+    s = '''UPDATE {0} 
+            SET order_status={1} 
+            WHERE ID={2}'''.format(symbol_table['sym'], 1, str(id))
+    print(s)
+    curr.execute(s)
     conn.commit()
     conn.close()
             
@@ -91,12 +89,11 @@ def update_step(sym, dir):
     symbol_table = get_current_trade(sym)
     conn = sqlite3.connect('db/database.db')
     curr = conn.cursor()
-
-    x=curr.execute('''select last_insert_rowid()''')
+    x=curr.execute('''select MAX(ID) from {0};'''.format(sym))
     id=x.fetchone()[0]
     s = '''UPDATE {0} 
             SET step={1} 
-            WHERE ID={2}'''.format(symbol_table['sym'] , int(symbol_table['step'])+1, str(id))
+            WHERE ID={2}'''.format(symbol_table['sym'], int(symbol_table['step'])+1, str(id))
     print(s)
     curr.execute(s)
     conn.commit()
@@ -106,9 +103,10 @@ def record_halving(sym):
     symbol_table = get_current_trade(sym)
     conn = get_db_connection()
     halving = 1
-    x=conn.execute('''select last_insert_rowid()''')
+    curr = conn.cursor()
+    x=curr.execute('''select MAX(ID) from {0};'''.format(sym))    
     id=x.fetchone()[0]
-    conn.execute('UPDATE {0} SET halving = ? WHERE id =? AND dir = ?'.format(str(symbol_table['sym'])), (str(halving), str(id), str(dir)))
+    curr.execute('UPDATE {0} SET halving = ? WHERE id =? AND dir = ?'.format(str(symbol_table['sym'])), (str(halving), str(id), str(dir)))
     conn.commit()
     conn.close()
 
