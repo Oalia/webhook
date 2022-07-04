@@ -145,8 +145,10 @@ def close(sym, volume,magic_wanted, order_type, ticket, price):
         "type_time": mt5.ORDER_TIME_GTC, # good till cancelled
         "type_filling": mt5.ORDER_FILLING_RETURN,
     }
-    print(close_request)
-    return mt5.order_send(close_request)
+    # print(close_request)
+    close_order=  mt5.Close(sym, ticket)
+    print(close_order)
+    return close_order
 
 def order_close_by_magic(sym, magic_wanted):
     all_positions = mt5.positions_get(symbol=sym)
