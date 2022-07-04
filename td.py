@@ -33,10 +33,13 @@ def enter_half_cycle(sym, dir, size, strategy_type):
     # #is our trade and our current position an insurance or an opportunity?
     hedge(sym, dir)
     if strategy_type == "minus_step_one_buy":
-        mq.order_buy(sym, size, half_id)
-        mq.order_buy(sym, size, half_id)
-        mq.order_sell(sym, size, quater_id)
-        DB.register_new_trade(sym,dir, 0, created=datetime.time())
+        a = mq.order_buy(sym, size, half_id)
+        b = mq.order_buy(sym, size, half_id)
+        c = mq.order_sell(sym, size, quater_id)
+        if a != None and b != None and c != None:
+            DB.register_new_trade(sym,dir, b, created=datetime.time())
+        else:
+            print("ENTRY HALF CYCLE TRADE FAILED: ",a, b, c)
 
 def close_half_cycle(sym, dir, strategy_type):
     # check if any trade remains and close it.
