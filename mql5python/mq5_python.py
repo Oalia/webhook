@@ -1,9 +1,10 @@
 import MetaTrader5 as mt5
+import pandas as pd
 
-name = "your number"
-key = "your key"
-serv = "Pepperstone-MT5-Live01"
-path = r"C:\Program Files\MetaTrader 5 B\terminal64.exe"
+name = "50901624"
+key = "9qeEYbCF"
+serv = "ICMarketsSC-Demo"
+path = r"C:\Program Files\MetaTrader 5\terminal64.exe"
 # symbol = "EURUSD"
 lot = 0.02
 
@@ -13,7 +14,7 @@ def initialize(login = name, server=serv, password=key, path = path):
         print("initialize() failed, error code =", mt5.last_error())
         initialize(login, server, password, path)
     
-def order_buy(symbol = "USDJPY", lot = 0.01):
+def order_buy(symbol = "USDJPY", lot = 0.01, magic_id=0000):
     symbol_info = mt5.symbol_info(symbol)
     if symbol_info is None:
         print(symbol, "order_buy: not found, can not call order_check()")
@@ -41,7 +42,7 @@ def order_buy(symbol = "USDJPY", lot = 0.01):
         "type": mt5.ORDER_TYPE_BUY,
         "price": price,
         "deviation": deviation,
-        "magic": 234000,
+        "magic": magic_id,
         "comment": "python script open",
         "type_time": mt5.ORDER_TIME_GTC,
         "type_filling": mt5.ORDER_FILLING_RETURN,
@@ -55,7 +56,7 @@ def order_buy(symbol = "USDJPY", lot = 0.01):
     return result
 
 
-def order_sell(symbol = "USDJPY", lot = 0.01):
+def order_sell(symbol = "USDJPY", lot = 0.01, magic_id=0000):
     symbol_info = mt5.symbol_info(symbol)
     if symbol_info is None:
         print(symbol, "order_sell: not found, can not call order_check()")
@@ -84,8 +85,8 @@ def order_sell(symbol = "USDJPY", lot = 0.01):
         "type": mt5.ORDER_TYPE_SELL,
         "price": price,
         "deviation": deviation,
-        "magic": 234000,
-        "comment": "python script open",
+        "magic": magic_id,
+        "comment": "python script sell",
         "type_time": mt5.ORDER_TIME_GTC,
         "type_filling": mt5.ORDER_FILLING_RETURN,
     }
@@ -97,7 +98,53 @@ def order_sell(symbol = "USDJPY", lot = 0.01):
         # request the result as a dictionary and display it element by element
     # TODO might want to email or text responsible person about the order results.
     return result
-    
+
+def close_all(sym):
+    check_closed = []
+
+    all_positions = mt5.positions_get(symbol=sym)
+    if all_positions==None:
+        """"""
+    elif len(all_positions)>0:
+        df=pd.DataFrame(list(all_positions),columns=all_positions[0]._asdict().keys())
+        for _, row in df.iterrows():
+            if row['type'] == 1: #current a short, buy to close.
+                check_closed.append(close(sym, row['volume'], row['magic'], mt5.ORDER_TYPE_BUY, row['ticket'], mt5.symbol_info_tick(sym).ask))
+
+            if row[type] == 0:  #long, sell to close
+                check_closed.append(close(sym, row['volume'], row['magic'], mt5.ORDER_TYPE_SELL, row['ticket'], mt5.symbol_info_tick(sym).bid))
+
+def close(sym, volume,magic_wanted, order_type, ticket, price):
+    """"""
+    close_request={
+        "action": mt5.TRADE_ACTION_DEAL,
+        "symbol": sym,
+        "volume": volume,
+        "type": order_type,
+        "position": ticket,
+        "price": price,
+        "deviation": 20,
+        "magic": magic_wanted,
+        "comment": "python script close",
+        "type_time": mt5.ORDER_TIME_GTC, # good till cancelled
+        "type_filling": mt5.ORDER_FILLING_RETURN,
+    }
+    return mt5.order_send(close_request)
+
+def order_close_by_magic(sym, magic_wanted):
+    all_positions = mt5.positions_get(symbol=sym)
+    if all_positions==None:
+        """"""
+    elif len(all_positions)>0:
+        df=pd.DataFrame(list(all_positions),columns=all_positions[0]._asdict().keys())
+        for _, row in df.iterrows():
+            if row['magic'] == magic_wanted:
+                if row['type'] == 0:
+                    close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_SELL,row['ticket'], mt5.symbol_info_tick(sym).bid)
+                else:
+                    close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_BUY,row['ticket'], mt5.symbol_info_tick(sym).ask)
+
+
 def shutdown():
     mt5.shutdown()
 

@@ -7,6 +7,7 @@ CREATE TABLE posts (
     dir TEXT NOT NULL,
     sym TEXT NOT NULL,
     step int NOT NULL,
+    halving boolean NOT NULL,
     entry_price real NOT NULL,
     status TEXT 
 );

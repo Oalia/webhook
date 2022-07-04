@@ -36,6 +36,7 @@ def webhook():
     # time_entry = datetime.now()
     webhook_message = (request.data)
     msg = webhook_message.decode(encoding='UTF-8').split(" ")
+    type = msg[3]
     dir = msg[0]
     sym = msg[2]
     size = double(msg[1])
@@ -45,26 +46,31 @@ def webhook():
     will be getting entry and exit xignals alone.
     updates would incorporate, drawdowns, hedging, and possible tracking/updatiing by continual step signals
     """
-    if dir == "UP":
-        TD.enter_half_cycle(sym, 1, size, "minus_step_one_buy")
-    if dir == "DN":
-        TD.close_half_cycle(sym, 0, size, "minus_step_one_buy")
-    # current_trade = DB.get_current_trade(sym)
-    # if current_trade != None:
-    #     cur_dir = current_trade['dir']
-    #     if cur_dir != dir:
-    #         # TD.close_half_cycle(sym, dir, size, "minus_step_one_buy")
-    #         # TD.enter_half_cycle(sym, dir, size, "minus_step_one_buy")
-
-    #         DB.register_closing_position(sym, dir)
-    #         # DB.register_new_trade(sym, dir, entry_price="", created=time_entry)
+    if type == "big":
+        current_trade = DB.get_current_trade(sym)
+        if current_trade != None: #if a trade is open
+            if current_trade['open'] == True:
+                cur_dir = current_trade['dir']
+                if cur_dir != dir: # if trade direction has changed.
+                    TD.close_half_cycle(sym, dir, "minus_step_one_buy")
+                else:
+                    DB.update_step(sym, dir)
+            elif current_trade['open'] == False:
+                if dir == "DN":
+                    TD.enter_half_cycle(sym, dir, size, "minus_step_one_buy")
+        else:
+            if dir == "DN":
+                TD.enter_half_cycle(sym, dir, size, "minus_step_one_buy")
         
-    #     else:
-    #         # print(current_trade['step'])
-    #         TD.update_position(dir, sym, current_trade['step'], current_trade['entry_price'])
-    # else:
-    #     TD.enter_half_cycle(sym, dir, size, "minus_step_one_buy")
-        
+    if type == "small":
+        current_trade = DB.get_current_trade(sym)
+        if current_trade != None: #if a trade is open
+            step = current_trade['step']
+            if step >= 2:
+                cur_dir = current_trade['dir']
+                if cur_dir != dir: #
+                    if current_trade['halving'] == False:
+                        TD.halving_event(sym, size, "minus_step_one_buy")
     return ""
 
 if __name__ == '__main__':

@@ -15,6 +15,9 @@ CREATE TABLE posts (
 );
 """
 
+quater_id = 32
+half_id = 321
+
 def hedge(sym, dir):
     "implement hedging strategy"
 
@@ -24,33 +27,32 @@ def update_depth(sym, id, depth):
 def enter_half_cycle(sym, dir, size, strategy_type):
     ""
     # enter first position, get it's db id, update its depth when other positions get filled
-    depth = 0
-    entry_price = 0
     ## hedging would probably rely on information from looking and analyzing past trade drawdowns in relation to itself, surroundings and outside forces
     ## hedging - like an insurance or like an opportunistic trade? which approach?
     ## as hedging in this case looks at the opposite direction, 
     # #is our trade and our current position an insurance or an opportunity?
     hedge(sym, dir)
     if strategy_type == "minus_step_one_buy":
-        if dir == 1:
-            mq.order_buy(sym, size)
-        elif dir == 0:
-            mq.order_sell(sym, size)
-        DB.register_new_trade(sym,dir,0, created=datetime.now())
+        mq.order_buy(sym, size, half_id)
+        mq.order_buy(sym, size, half_id)
+        mq.order_sell(sym, size, quater_id)
+        DB.register_new_trade(sym,dir, 0, created=datetime.now())
 
-def close_half_cycle(sym, dir, size, strategy_type):
+def close_half_cycle(sym, dir, strategy_type):
     # check if any trade remains and close it.
-    # log an sms
+
     if strategy_type == "minus_step_one_buy":
-        if dir == 0:
-            mq.order_sell(sym, size)
-        elif dir == 1:
-            mq.order_buy(sym, size)
-    # might want to include trade details like
-    # # drawdown reached. 
-    # # Data analysis about possible spring ups above close, etc
-    # would possibly make use of closefirststep, updateposition etc if we incorporate reaching for springups
+        mq.close_all(sym)
     DB.register_closing_position(sym, dir)
+
+
+def halving_event(sym, size, strategy_type):
+    # if DB.check_halving(sym) == 0:
+    if strategy_type == "minus_step_one_buy":
+        mq.order_buy(sym, size, half_id)
+        mq.order_sell(sym, size/4, half_id)
+        mq.order_close_by_magic(sym, quater_id)
+        DB.record_halving(sym)
 
 
 # def close_first_step(dir, sym):

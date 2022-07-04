@@ -75,6 +75,14 @@ def update_step(sym, dir):
     conn.commit()
     conn.close()
 
+def record_halving(sym):
+    symbol_table = get_current_trade(sym)
+    conn = get_db_connection()
+    halving = True
+    conn.execute('UPDATE {0} SET halving = {1} WHERE id = (SELECT LAST_INSERT_ID()) AND dir = {2}'.format(symbol_table,halving,dir))
+    conn.commit()
+    conn.close()
+
 # def edit_trade(id):
 #     post = get_current_trade(id)
 #     if request.method == 'POST':
