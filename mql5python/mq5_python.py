@@ -113,7 +113,7 @@ def order_sell(symbol = "USDJPY", lot = 0.01, magic_id=0000):
     # TODO might want to email or text responsible person about the order results.
     return price
 
-def close_all(sym):
+def close_all(sym=""):
     check_closed = []
 
     all_positions = mt5.positions_get(symbol=sym)
@@ -122,8 +122,10 @@ def close_all(sym):
     elif len(all_positions)>0:
         df=pd.DataFrame(list(all_positions),columns=all_positions[0]._asdict().keys())
         for _, row in df.iterrows():
+            if sym == "":
+                sym=row['symbol']
             if row['type'] == 0: #current a short, buy to close.
-                check_closed.append(close(sym, row['volume'], row['magic'], mt5.ORDER_TYPE_BUY_LIMIT, row['ticket'], mt5.symbol_info_tick(sym).ask))
+                check_closed.append(close(row['type'], row['volume'], row['magic'], mt5.ORDER_TYPE_BUY_LIMIT, row['ticket'], mt5.symbol_info_tick(sym).ask))
 
             if row['type'] == 1:  #long, sell to close
                 check_closed.append(close(sym, row['volume'], row['magic'], mt5.ORDER_TYPE_SELL_LIMIT, row['ticket'], mt5.symbol_info_tick(sym).bid))
@@ -161,71 +163,3 @@ def order_close_by_magic(sym, magic_wanted):
 
 def shutdown():
     mt5.shutdown()
-
-# def order_buy_close(result, symbol, lot = 0.01):
-#     # create a close request
-#     position_id=result.order
-#     price=mt5.symbol_info_tick(symbol).bid
-#     deviation=20
-#     request={
-#         "action": mt5.TRADE_ACTION_DEAL,
-#         "symbol": symbol,
-#         "volume": lot,
-#         "type": mt5.ORDER_TYPE_SELL,
-#         "position": position_id,
-#         "price": price,
-#         "deviation": deviation,
-#         "magic": 234000,
-#         "comment": "python script close",
-#         "type_time": mt5.ORDER_TIME_GTC,
-#         "type_filling": mt5.ORDER_FILLING_RETURN,
-#     }
-#     # send a trading request
-#     result=mt5.order_send(request)
-#     # check the execution result
-#     print("3. close position #{}: sell {} {} lots at {} with deviation={} points".format(position_id,symbol,lot,price,deviation))
-#    
-#     while(result.retcode != mt5.TRADE_RETCODE_DONE):
-#         order_buy_close(result, symbol, lot)
-#         print("4. buy_selling_close order_send failed, retcode={}".format(result.retcode))
-#         print("   result",result)
-#     print("4. position #{} closed, {}".format(position_id,result))
-#     return order_sell(symbol, lot)
-#    
-# def order_sell_close(result, symbol, lot = 0.01):
-#     # create a close request
-#     position_id=result.order
-#     price=mt5.symbol_info_tick(symbol).ask
-#     deviation=20
-#     request={
-#         "action": mt5.TRADE_ACTION_DEAL,
-#         "symbol": symbol,
-#         "volume": lot,
-#         "type": mt5.ORDER_TYPE_BUY,
-#         "position": position_id,
-#         "price": price,
-#         "deviation": deviation,
-#         "magic": 234000,
-#         "comment": "python script close",
-#         "type_time": mt5.ORDER_TIME_GTC,
-#         "type_filling": mt5.ORDER_FILLING_RETURN,
-#     }
-#     # send a trading request
-#     result=mt5.order_send(request)
-#     # check the execution result
-#     print("3. sell buying close position #{}: sell {} {} lots at {} with deviation={} points".format(position_id,symbol,lot,price,deviation));
-# 
-#     while(result.retcode != mt5.TRADE_RETCODE_DONE):
-#         order_sell_close(result, symbol, lot)
-#         print("4. sell_buying_close order_send failed, retcode={}".format(result.retcode))
-#         print("   result",result)
-#     print("4. position #{} closed, {}".format(position_id,result))
-#     return order_buy(symbol, lot)
-# 
-# def symbols_total():
-#     # get the number of financial instruments
-#     symbols=mt5.symbols_total()
-#     if symbols>0:
-#         print("Total symbols =",symbols)
-#     else:
-#         print("symbols not found")

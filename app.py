@@ -21,8 +21,8 @@ def webhook():
     msg = webhook_message.decode(encoding='UTF-8').split(" ")
     type = msg[3]
     dir = msg[0]
-    sym = "USDJPY"
-    size = double(msg[1])
+    sym = "AUDCHF"
+    size = double(msg[1])/10
     mq.initialize()
     if type == "big":
         current_trade = DB.get_current_trade(sym)

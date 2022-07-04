@@ -45,7 +45,7 @@ def close_half_cycle(sym, dir, strategy_type):
     # check if any trade remains and close it.
 
     if strategy_type == "minus_step_one_buy":
-        mq.close_all(sym)
+        mq.close_all()
     DB.register_closing_position(sym, dir)
 
 
