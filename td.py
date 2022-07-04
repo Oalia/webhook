@@ -11,7 +11,7 @@ CREATE TABLE posts (
     size int NOT NULL,
     depth int NOT NULL,
     entry_price real NOT NULL,
-    status TEXT NOT NULL,
+    order_status TEXT NOT NULL,
 );
 """
 
@@ -36,7 +36,7 @@ def enter_half_cycle(sym, dir, size, strategy_type):
         mq.order_buy(sym, size, half_id)
         mq.order_buy(sym, size, half_id)
         mq.order_sell(sym, size, quater_id)
-        DB.register_new_trade(sym,dir, 0, created=datetime.now())
+        DB.register_new_trade(sym,dir, 0, created=datetime.time())
 
 def close_half_cycle(sym, dir, strategy_type):
     # check if any trade remains and close it.

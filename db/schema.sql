@@ -7,9 +7,9 @@ CREATE TABLE posts (
     dir TEXT NOT NULL,
     sym TEXT NOT NULL,
     step int NOT NULL,
-    halving boolean NOT NULL,
+    halving int NOT NULL,
     entry_price real NOT NULL,
-    status TEXT 
+    order_status int NOT NULL
 );
 
 -- DROP TABLE IF EXISTS posts;
@@ -20,4 +20,5 @@ CREATE TABLE posts (
 --     direction TEXT NOT NULL,
 --     depth INTEGER,
 --     step INTEGER NOT NULL,
+--     order_status: 0 is open 1 is closed
 -- );

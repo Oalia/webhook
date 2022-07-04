@@ -13,12 +13,12 @@ CREATE TABLE posts (
     step int NOT NULL,
     depth int NOT NULL,
     entry_price real NOT NULL,
-    status TEXT
+    order_status TEXT
 );
 """
 def create_table(conn, table_name):
-    with open('webhook/db/schema.sql') as f:
-            conn.executescript(f.read())
+    with open('db/schema.sql') as f:
+        conn.executescript(f.read())
     conn.execute(f'ALTER TABLE posts RENAME TO {table_name}')   
     return conn
 
@@ -35,7 +35,7 @@ def check_if_table_exists_create_one_if_not(table_name):
         
 
 def get_db_connection():
-    conn = sqlite3.connect('webhook/db/database.db')
+    conn = sqlite3.connect('db/database.db')
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -49,37 +49,68 @@ def get_current_trade(symbol):
     return position
 
 def register_new_trade(sym, dir, entry_price, created):
+    """
+CREATE TABLE posts (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dir TEXT NOT NULL,
+    sym TEXT NOT NULL,
+    step int NOT NULL,
+    halving boolean NOT NULL,
+    entry_price real NOT NULL,
+    order_status TEXT 
+);
+"""
     conn = check_if_table_exists_create_one_if_not(sym)
     cur = conn.cursor()
-    cur.execute("INSERT INTO {0} (created, dir, sym, step, entry_price, status) VALUES (?,?,?,?,?,?)".format(sym),
-                (created, dir, sym, 0, entry_price, "open")
+    cur.execute("INSERT INTO {0} (created, dir, sym, step,halving, entry_price, order_status) VALUES (?,?,?,?,?,?,?)".format(str(sym)),
+                (str(created), str(dir), str(sym), str(0), str(0), str(entry_price), str(0))
                 )
     conn.commit()
-    # conn.close()
+    conn.close()
 
-# register_closing_position(sym, status = "closed")
+# register_closing_position(sym, order_status = "closed")
 def register_closing_position(sym, dir):
     symbol_table = get_current_trade(sym)
     conn = get_db_connection()
-    conn.execute('UPDATE {0} SET status = closed'
-                    ' WHERE id = (SELECT LAST_INSERT_ID()) AND dir = ?'.format(symbol_table), (dir))
+
+    x=conn.execute('''select last_insert_rowid()''')
+    id=x.fetchone()[0]
+    curr = conn.cursor()
+    # s = """UPDATE {0} SET order_status=1 WHERE ID={1}""".format(symbol_table['sym'])
+    # print(s, " reg_close_trade")
+
+    sql = '''
+            UPDATE {0} 
+            SET order_status = ?, 
+            WHERE ID =? '''.format(symbol_table['sym'])
+    curr.execute(sql, (1, str(id)))
     conn.commit()
-    # conn.close()
+    conn.close()
             
 
 def update_step(sym, dir):
     symbol_table = get_current_trade(sym)
-    conn = get_db_connection()
-    next_step = symbol_table['step']+1
-    conn.execute('UPDATE {0} SET step = {1} WHERE id = (SELECT LAST_INSERT_ID()) AND dir = {2}'.format(symbol_table,next_step,dir))
+    conn = sqlite3.connect('db/database.db')
+    curr = conn.cursor()
+
+    x=curr.execute('''select last_insert_rowid()''')
+    id=x.fetchone()[0]
+    s = '''UPDATE {0} 
+            SET step={1} 
+            WHERE ID={2}'''.format(symbol_table['sym'] , int(symbol_table['step'])+1, str(id))
+    print(s)
+    curr.execute(s)
     conn.commit()
     conn.close()
 
 def record_halving(sym):
     symbol_table = get_current_trade(sym)
     conn = get_db_connection()
-    halving = True
-    conn.execute('UPDATE {0} SET halving = {1} WHERE id = (SELECT LAST_INSERT_ID()) AND dir = {2}'.format(symbol_table,halving,dir))
+    halving = 1
+    x=conn.execute('''select last_insert_rowid()''')
+    id=x.fetchone()[0]
+    conn.execute('UPDATE {0} SET halving = ? WHERE id =? AND dir = ?'.format(str(symbol_table['sym'])), (str(halving), str(id), str(dir)))
     conn.commit()
     conn.close()
 
