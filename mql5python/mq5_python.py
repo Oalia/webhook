@@ -2,11 +2,15 @@ from time import time
 import MetaTrader5 as mt5
 import pandas as pd
 
-name = 50901624
-key = "9qeEYbCF"
-serv = "ICMarketsSC-Demo"
+# name = 50901624
+# key = "9qeEYbCF"
+# serv = "ICMarketsSC-Demo"
 path = "C:/Program Files/MetaTrader 5/terminal64.exe"
 lot = 0.02
+
+name = 50902855
+key = "eXG8GpQ4"
+serv = "ICMarketsSC-Demo"
 #  path,                     // path to the MetaTrader 5 terminal EXE file
 #    login=LOGIN,              // account number
 #    password="PASSWORD",      // password
