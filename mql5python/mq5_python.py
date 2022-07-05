@@ -126,9 +126,10 @@ def close_all(sym=""):
                 sym=row['symbol']
             if row['type'] == 0: #current a short, buy to close.
                 check_closed.append(close(row['type'], row['volume'], row['magic'], mt5.ORDER_TYPE_BUY_LIMIT, row['ticket'], mt5.symbol_info_tick(sym).ask))
-
+                # check_closed.append(close(sym, row['ticket']))
             if row['type'] == 1:  #long, sell to close
                 check_closed.append(close(sym, row['volume'], row['magic'], mt5.ORDER_TYPE_SELL_LIMIT, row['ticket'], mt5.symbol_info_tick(sym).bid))
+                # check_closed.append(close(sym, row['ticket']))
 
 def close(sym, volume,magic_wanted, order_type, ticket, price):
     """"""
