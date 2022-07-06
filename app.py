@@ -15,15 +15,8 @@ def index():
     conn.close()
     return render_template('index.html', posts=posts)
 
-@app.route('/webhooks', methods=['POST'])
-def webhook():
-    webhook_message = (request.data)
-    msg = webhook_message.decode(encoding='UTF-8').split(" ")
-    type = msg[3]
-    dir = msg[0]
-    sym = "AUDCHF"
-    size = double(msg[1])/10
-    mq.initialize()
+def strategy_minus_step_one_buy(sym,dir,size,type):
+    strategy_name = "minus_step_one_buy"
     if type == "big":
         current_trade = DB.get_current_trade(sym)
         if current_trade != None: #if a trade is open
@@ -31,18 +24,18 @@ def webhook():
                 cur_dir = current_trade['dir']
                 if cur_dir != dir: # if trade direction has changed.
                     print("TRYING TO CLOSE HALF CYCLE:\n")
-                    TD.close_half_cycle(sym, dir, "minus_step_one_buy")
+                    TD.close_half_cycle(sym, dir, strategy_name)
                 else:
                     print("ABOUT TO STEP FORWARD: WEAR YOUR SEATBELTS\n")
                     DB.update_step(sym, dir)
             elif current_trade['order_status'] == 1: 
                 if dir == "DN":
                     print("NO OPEN TRADES ON KNOWN SYMBOL. ENTERING.\n")
-                    TD.enter_half_cycle(sym, dir, size, "minus_step_one_buy")
+                    TD.enter_half_cycle(sym, dir, size, strategy_name)
         else:
             if dir == "DN":
                 print("NO CURRENT TRADE: START THE MACHINE:\n")
-                TD.enter_half_cycle(sym, dir, size, "minus_step_one_buy")
+                TD.enter_half_cycle(sym, dir, size, strategy_name)
             if dir == "UP":
                 print("dude")
 
@@ -54,7 +47,55 @@ def webhook():
                 cur_dir = current_trade['dir']
                 if cur_dir != dir: #
                     if current_trade['halving'] == 0:
-                        TD.halving_event(sym, size, "minus_step_one_buy")
+                        TD.halving_event(sym, size, strategy_name)
+
+def strategy_minus_step_one_buy_chill(sym,dir,size,type):
+    strategy_name = "minus_chill"
+    if type == "big":
+        current_trade = DB.get_current_trade(sym)
+        if current_trade != None: #if a trade is open
+            if current_trade['order_status'] == 0: 
+                cur_dir = current_trade['dir']
+                if cur_dir != dir: # if trade direction has changed.
+                    print("TRYING TO CLOSE HALF CYCLE:\n")
+                    TD.close_half_cycle(sym, dir, strategy_name)
+                else:
+                    print("ABOUT TO STEP FORWARD: WEAR YOUR SEATBELTS\n")
+                    DB.update_step(sym, dir)
+            elif current_trade['order_status'] == 1: 
+                if dir == "DN":
+                    print("NO OPEN TRADES ON KNOWN SYMBOL. ENTERING.\n")
+                    TD.enter_half_cycle(sym, dir, size, strategy_name)
+        else:
+            if dir == "DN":
+                print("NO CURRENT TRADE: START THE MACHINE:\n")
+                TD.enter_half_cycle(sym, dir, size, strategy_name)
+            if dir == "UP":
+                print("dude")
+
+    if type == "small":
+        current_trade = DB.get_current_trade(sym)
+        if current_trade != None: #if a trade is open
+            step = current_trade['step']
+            if step >= 2:
+                cur_dir = current_trade['dir']
+                if cur_dir != dir: #
+                    if current_trade['halving'] == 0:
+                        TD.halving_event(sym, size, strategy_name)
+
+
+@app.route('/webhooks', methods=['POST'])
+def webhook():
+    webhook_message = (request.data)
+    msg = webhook_message.decode(encoding='UTF-8').split(" ")
+    type = msg[3]
+    dir = msg[0]
+    sym = "AUDCHF"
+    size = double(msg[1])/10
+    mq.initialize()
+    strategy_minus_step_one_buy(sym,dir,size,type)
+    strategy_minus_step_one_buy_chill(sym,dir,size,type)
+    
     mq.shutdown()
     return ""
 
