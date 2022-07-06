@@ -13,7 +13,7 @@ CREATE TABLE posts (
     step int NOT NULL,
     depth int NOT NULL,
     entry_price real NOT NULL,
-    order_status TEXT
+    is_trade_closed TEXT
 );
 """
 def create_table(conn, table_name):
@@ -22,8 +22,8 @@ def create_table(conn, table_name):
     conn.execute(f'ALTER TABLE posts RENAME TO {table_name}')   
     return conn
 
-def check_if_table_exists_create_one_if_not(table_name, database_name):
-    conn = get_db_connection(database_name)
+def check_if_table_exists_create_one_if_not(table_name, db_path): 
+    conn = get_db_connection(db_path)
     conn.row_factory = sqlite3.Row   #   add this row
     c = conn.cursor()
     c.execute(f'SELECT count(name) FROM sqlite_master WHERE type="table" AND name=\'{table_name}\';')
@@ -34,37 +34,37 @@ def check_if_table_exists_create_one_if_not(table_name, database_name):
         return create_table(conn, table_name)
         
 'db/database.db'
-def get_db_connection(database_name):
-    conn = sqlite3.connect(database_name)
+def get_db_connection(db_path):
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
 
 # if same trade dir, we could update stop losses or take partial credit if step 1. If not, we exit. 
 # Enter new set of trades. and register those trades.
-def get_current_trade(symbol, database_name):
-    conn = check_if_table_exists_create_one_if_not(symbol, database_name)
+def get_current_trade(symbol, db_path):
+    conn = check_if_table_exists_create_one_if_not(symbol, db_path)
     conn.row_factory = sqlite3.Row   #   add this row
     position = conn.execute(f'SELECT * FROM {symbol} order by ID DESC LIMIT 1').fetchone()
     return position
 
-def register_new_trade(sym, dir, entry_price, created, database_name):
-    conn = check_if_table_exists_create_one_if_not(sym, database_name)
+def register_new_trade(sym, dir, entry_price, created, db_path):
+    conn = check_if_table_exists_create_one_if_not(sym, db_path)
     cur = conn.cursor()
-    cur.execute("INSERT INTO {0} (created, dir, sym, step,halving, entry_price, order_status) VALUES (?,?,?,?,?,?,?)".format(str(sym)),
+    cur.execute("INSERT INTO {0} (created, dir, sym, step,halving, entry_price, is_trade_closed) VALUES (?,?,?,?,?,?,?)".format(str(sym)),
                 (str(created), str(dir), str(sym), str(0), str(0), str(entry_price), str(0))
                 )
     conn.commit()
     conn.close()
 
-def register_closing_position(sym, dir, database_name):
-    symbol_table = get_current_trade(sym, database_name)
-    conn = sqlite3.connect(database_name)
+def register_closing_position(sym, dir, db_path):
+    symbol_table = get_current_trade(sym, db_path)
+    conn = sqlite3.connect(db_path)
     curr = conn.cursor()
     x=curr.execute('''select MAX(ID) from {0};'''.format(sym))
     id=x.fetchone()[0]
     s = '''UPDATE {0} 
-            SET order_status={1} 
+            SET is_trade_closed={1} 
             WHERE ID={2}'''.format(symbol_table['sym'], 1, str(id))
     print(s)
     curr.execute(s)
@@ -72,9 +72,9 @@ def register_closing_position(sym, dir, database_name):
     conn.close()
             
 
-def update_step(sym, dir, database_name):
-    symbol_table = get_current_trade(sym, database_name)
-    conn = sqlite3.connect(database_name)
+def update_step(sym, dir, db_path):
+    symbol_table = get_current_trade(sym, db_path)
+    conn = sqlite3.connect(db_path)
     curr = conn.cursor()
     x=curr.execute('''select MAX(ID) from {0};'''.format(sym))
     id=x.fetchone()[0]
@@ -86,9 +86,9 @@ def update_step(sym, dir, database_name):
     conn.commit()
     conn.close()
 
-def record_halving(sym, database_name):
-    symbol_table = get_current_trade(sym, database_name)
-    conn = get_db_connection(database_name)
+def record_halving(sym, db_path):
+    symbol_table = get_current_trade(sym, db_path)
+    conn = get_db_connection(db_path)
     halving = 1
     curr = conn.cursor()
     x=curr.execute('''select MAX(ID) from {0};'''.format(sym))    

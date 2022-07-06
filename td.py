@@ -11,7 +11,7 @@ CREATE TABLE posts (
     size int NOT NULL,
     depth int NOT NULL,
     entry_price real NOT NULL,
-    order_status TEXT NOT NULL,
+    is_trade_closed TEXT NOT NULL,
 );
 """
 

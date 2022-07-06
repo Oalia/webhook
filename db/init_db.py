@@ -12,13 +12,13 @@ CREATE TABLE posts (
     step int NOT NULL,
     halving boolean NOT NULL,
     entry_price real NOT NULL,
-    order_status TEXT 
+    is_trade_closed TEXT 
 );
 """
 with open('db/schema.sql') as f:
     connection.executescript(f.read())
 cur = connection.cursor()
-# cur.execute("INSERT INTO posts (created, dir, sym, step, halving, entry_price, order_status) VALUES (?,?,?,?,?,?,?)",
+# cur.execute("INSERT INTO posts (created, dir, sym, step, halving, entry_price, is_trade_closed) VALUES (?,?,?,?,?,?,?)",
 #             (str(time.time()), str('test_dir'), str("test_symbol"), str("0"), str("0"), str("0.00"), str("0"))
 #             )
 connection.commit()
