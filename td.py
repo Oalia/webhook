@@ -34,12 +34,20 @@ def hedge(sym, dir):
 
 def half_cycle_buy(sym, strategy_name):
     "It was a sell signal entry so we register it's buy close using it original sell entry signal"
-    mq.close_all(sym, strategy_name)
-    DB.register_closed(sym, ST.SELL, strategy_name)
+    closed = mq.close_all(sym, strategy_name)
+    retry_close = 0
+    while (not closed):
+        if retry_close >= 3:
+            break
+        closed = mq.close_all(sym, strategy_name)
+        retry_close = retry_close + 1
+    if closed:
+        DB.register_closed(sym, ST.SELL, strategy_name)
+
     retries = 0
     order = mq.order_buy(sym, strategy_name)
     while(not order):
-        if retries == 3:
+        if retries >= 3:
             break
         order = mq.order_buy(sym, strategy_name)
         retries = retries + 1
@@ -48,12 +56,20 @@ def half_cycle_buy(sym, strategy_name):
 
 
 def half_cycle_sell(sym, strategy_name):
-    mq.close_all(sym, strategy_name)
-    DB.register_closed(sym, ST.BUY, strategy_name)
+    closed = mq.close_all(sym, strategy_name)
+    retry_close = 0
+    while (not closed):
+        if retry_close >= 3:
+            break
+        closed = mq.close_all(sym, strategy_name)
+        retry_close = retry_close + 1
+    if closed:
+        DB.register_closed(sym, ST.SELL, strategy_name)
+
     retries = 0
     order = mq.order_sell(sym, strategy_name)
     while(not order):
-        if retries == 3:
+        if retries >= 3:
             break
         order = mq.order_sell(sym, strategy_name)
         retries = retries + 1
@@ -62,12 +78,20 @@ def half_cycle_sell(sym, strategy_name):
 
 
 def cycle_buy(sym, strategy_name):
-    mq.close_all(sym, strategy_name)
-    DB.register_closed(sym, ST.SELL, strategy_name)
+    closed = mq.close_all(sym, strategy_name)
+    retry_close = 0
+    while (not closed):
+        if retry_close >= 3:
+            break
+        closed = mq.close_all(sym, strategy_name)
+        retry_close = retry_close + 1
+    if closed:
+        DB.register_closed(sym, ST.SELL, strategy_name)
+
     retries = 0
     order = mq.order_buy(sym, strategy_name)
     while(not order):
-        if retries == 3:
+        if retries >= 3:
             break
         order = mq.order_buy(sym, strategy_name)
         retries = retries + 1
@@ -76,13 +100,20 @@ def cycle_buy(sym, strategy_name):
 
 
 def cycle_sell(sym, strategy_name):
-    mq.close_all(sym, strategy_name)
-    DB.register_closed(sym, ST.BUY, strategy_name)
+    closed = mq.close_all(sym, strategy_name)
+    retry_close = 0
+    while (not closed):
+        if retry_close >= 3:
+            break
+        closed = mq.close_all(sym, strategy_name)
+        retry_close = retry_close + 1
+    if closed:
+        DB.register_closed(sym, ST.SELL, strategy_name)
 
     retries = 0
     order = mq.order_sell(sym, strategy_name)
     while(not order):
-        if retries == 3:
+        if retries >= 3:
             break
         order = mq.order_sell(sym, strategy_name)
         retries = retries + 1

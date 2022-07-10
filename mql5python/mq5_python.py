@@ -178,15 +178,17 @@ def close(sym, volume,magic_wanted, order_type, ticket, price):
         "type_filling": mt5.ORDER_FILLING_RETURN,
     }
     # print(close_request)
-    close_order=  mt5.Close(sym, ticket)
-    if close_order != None: 
-        if close_order.retcode != mt5.TRADE_RETCODE_DONE:
-            if close_order.retcode == 10027:
+    result=  mt5.Close(sym, ticket)
+    if result != None: 
+        if result.retcode != mt5.TRADE_RETCODE_DONE:
+            if result.retcode == 10027:
                 UT.critical_error("Autotrading disabled")
-            print("order_sell: 2. order_sell failed, retcode={}".format(close_order.retcode))
-            return None
-    # print(close_order)
-    return close_order
+            print("order_sell: order_send failed, retcode={}".format(result.retcode))
+            return False
+            # request the result as a dictionary and display it element by element
+        else: 
+            return True
+    return False
 
 def shutdown():
     mt5.shutdown()
