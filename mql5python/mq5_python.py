@@ -1,6 +1,8 @@
 from time import time
 import MetaTrader5 as mt5
 import pandas as pd
+from db import db as DB
+import strategies as ST
 
 # name = 50901624
 # key = "9qeEYbCF"
@@ -18,6 +20,9 @@ serv = "ICMarketsSC-Demo"
 #    timeout=TIMEOUT,          // timeout
 #    portable=False   
 
+
+
+
 def account_login(login = name,password=key, server= serv,):
     if mt5.login(login,password,server):
         print("logged in succesffully")
@@ -30,8 +35,15 @@ def initialize(login = name, server=serv, password=key, path=path):
         print("Initialization failed, error code {}", mt5.last_error())
     else:
         account_login(login, password, server)
-    
-def order_buy(symbol = "USDJPY", lot = 0.01, magic_id=0000):
+
+def calculate_lot(strategy_name):
+    """"""
+    return 100
+
+def order_buy(symbol, strategy_name):
+    lot = calculate_lot(strategy_name)
+    magic_number = ST.magic_numbers[strategy_name]
+
     symbol_info = mt5.symbol_info(symbol)
     if symbol_info is None:
         print(symbol, "order_buy: not found, can not call order_check()")
@@ -59,7 +71,7 @@ def order_buy(symbol = "USDJPY", lot = 0.01, magic_id=0000):
         "type": mt5.ORDER_TYPE_BUY_LIMIT,
         "price": price,
         "deviation": deviation,
-        "magic": magic_id,
+        "magic": magic_number,
         "comment": "python buy",
         "type_time": mt5.ORDER_TIME_GTC,
         "type_filling": mt5.ORDER_FILLING_RETURN,
@@ -73,7 +85,10 @@ def order_buy(symbol = "USDJPY", lot = 0.01, magic_id=0000):
     # TODO might want to email or text responsible person about the order results.
     return price
 
-def order_sell(symbol = "USDJPY", lot = 0.01, magic_id=0000):
+def order_sell(symbol, strategy_name):
+    lot = calculate_lot(strategy_name)
+    magic_number = ST.magic_numbers[strategy_name]
+
     symbol_info = mt5.symbol_info(symbol)
     if symbol_info is None:
         print(symbol, "order_sell: not found, can not call order_check()")
@@ -102,7 +117,7 @@ def order_sell(symbol = "USDJPY", lot = 0.01, magic_id=0000):
         "type": mt5.ORDER_TYPE_SELL_LIMIT,
         "price": price,
         "deviation": deviation,
-        "magic": magic_id,
+        "magic": magic_number,
         "comment": "python sell",
         "type_time": mt5.ORDER_TIME_GTC,
         "type_filling": mt5.ORDER_FILLING_RETURN,
@@ -117,8 +132,9 @@ def order_sell(symbol = "USDJPY", lot = 0.01, magic_id=0000):
     # TODO might want to email or text responsible person about the order results.
     return price
 
-def close_all(sym=""):
+def close_all(sym, strategy_name):
     check_closed = []
+    magic_number = ST.magic_numbers[strategy_name]
 
     all_positions = mt5.positions_get(symbol=sym)
     if all_positions==None:
@@ -126,14 +142,16 @@ def close_all(sym=""):
     elif len(all_positions)>0:
         df=pd.DataFrame(list(all_positions),columns=all_positions[0]._asdict().keys())
         for _, row in df.iterrows():
-            if sym == "":
-                sym=row['symbol']
-            if row['type'] == 0: #current a short, buy to close.
-                check_closed.append(close(row['type'], row['volume'], row['magic'], mt5.ORDER_TYPE_BUY_LIMIT, row['ticket'], mt5.symbol_info_tick(sym).ask))
-                # check_closed.append(close(sym, row['ticket']))
-            if row['type'] == 1:  #long, sell to close
-                check_closed.append(close(sym, row['volume'], row['magic'], mt5.ORDER_TYPE_SELL_LIMIT, row['ticket'], mt5.symbol_info_tick(sym).bid))
-                # check_closed.append(close(sym, row['ticket']))
+            if row['magic'] == magic_number:
+                if sym == "":
+                    sym=row['symbol']
+                if row['type'] == 0: #current a short, buy to close.
+                    check_closed.append(close(row['type'], row['volume'], magic_number, mt5.ORDER_TYPE_BUY_LIMIT, row['ticket'], mt5.symbol_info_tick(sym).ask))
+                    # check_closed.append(close(sym, row['ticket']))
+                if row['type'] == 1:  #long, sell to close
+                    check_closed.append(close(sym, row['volume'], magic_number, mt5.ORDER_TYPE_SELL_LIMIT, row['ticket'], mt5.symbol_info_tick(sym).bid))
+                    # check_closed.append(close(sym, row['ticket']))
+    
 
 def close(sym, volume,magic_wanted, order_type, ticket, price):
     """"""
@@ -155,18 +173,18 @@ def close(sym, volume,magic_wanted, order_type, ticket, price):
     print(close_order)
     return close_order
 
-def order_close_by_magic(sym, magic_wanted):
-    all_positions = mt5.positions_get(symbol=sym)
-    if all_positions==None:
-        """"""
-    elif len(all_positions)>0:
-        df=pd.DataFrame(list(all_positions),columns=all_positions[0]._asdict().keys())
-        for _, row in df.iterrows():
-            if row['magic'] == magic_wanted:
-                if row['type'] == 0:
-                    close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_SELL_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).bid)
-                else:
-                    close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_BUY_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).ask)
+# def order_close_by_magic(sym, magic_wanted):
+#     all_positions = mt5.positions_get(symbol=sym)
+#     if all_positions==None:
+#         """"""
+#     elif len(all_positions)>0:
+#         df=pd.DataFrame(list(all_positions),columns=all_positions[0]._asdict().keys())
+#         for _, row in df.iterrows():
+#             if row['magic'] == magic_wanted:
+#                 if row['type'] == 0:
+#                     close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_SELL_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).bid)
+#                 else:
+#                     close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_BUY_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).ask)
 
 
 def shutdown():

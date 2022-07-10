@@ -12,3 +12,68 @@
 #         return 'success', 200
 #     else:
 #         abort(400)
+
+
+def strategy_minus_step_one_buy(sym,dir,size,type):
+    strategy_name = "minus_step_one_buy"
+    if type == "big":
+        current_trade = DB.get_current_trade(sym, strategy_name)
+        if current_trade != None: #if a trade is open
+            if current_trade['is_trade_closed'] == 0: 
+                cur_dir = current_trade['dir']
+                if cur_dir != dir: # if trade direction has changed.
+                    print("TRYING TO CLOSE HALF CYCLE:\n")
+                    TD.close_half_cycle(sym, dir, strategy_name)
+                else:
+                    print("ABOUT TO STEP FORWARD: WEAR YOUR SEATBELTS\n")
+                    DB.update_step(sym, dir)
+            elif current_trade['is_trade_closed'] == 1: 
+                if dir == "DN":
+                    print("NO OPEN TRADES ON KNOWN SYMBOL. ENTERING.\n")
+                    TD.enter_half_cycle(sym, dir, size, strategy_name)
+        else:
+            if dir == "DN":
+                print("NO CURRENT TRADE: START THE MACHINE:\n")
+                TD.enter_half_cycle(sym, dir, size, strategy_name)
+            if dir == "UP":
+                print("dude")
+
+    if type == "small":
+        current_trade = DB.get_current_trade(sym)
+        if current_trade != None: #if a trade is open
+            step = current_trade['step']
+            if step >= 2:
+                cur_dir = current_trade['dir']
+                if cur_dir != dir: #
+                    if current_trade['halving'] == 0:
+                        TD.halving_event(sym, size, strategy_name)
+
+def update_depth(sym, id, depth):
+    """"""
+
+# def enter_half_cycle(sym, dir, strategy_name):
+#     ""
+#     # enter first position, get it's db id, update its depth when other positions get filled
+#     # hedging would probably rely on information from looking and analyzing past trade drawdowns in relation to itself, surroundings and outside forces
+#     # hedging - like an insurance or like an opportunistic trade? which approach?
+#     # as hedging in this case looks at the opposite direction,
+#     # #is our trade and our current position an insurance or an opportunity?
+#     if strategy_name == ST.minus_step:
+#         if dir == "buy":
+#             mq.close_all(sym, strategy_name)
+#             DB.register_closed(sym, ST.BUY, strategy_name)
+#             mq.order_buy(sym, ST.BUY, strategy_name)
+#             DB.register_opened_without_listening(sym, "buy", strategy_name)
+#         elif dir == "sell":
+#             mq.close_all(sym, strategy_name)
+#             DB.register_closed(sym, ST.BUY, strategy_name)
+#             mq.order_buy(sym, ST.BUY, strategy_name)
+#             DB.register_opened_without_listening(sym, ST.BUY, strategy_name)
+
+# def halving_event(sym, size, strategy_type):
+#     # if DB.check_halving(sym) == 0:
+#     if strategy_type == "minus_step_one_buy":
+#         mq.order_buy(sym, size, half_id)
+#         mq.order_sell(sym, size/4, half_id)
+#         mq.order_close_by_magic(sym, quater_id)
+#         DB.record_halving(sym)

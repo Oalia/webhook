@@ -1,6 +1,8 @@
-from db  import db as DB
+from db import db as DB
 from mql5python import mq5_python as mq
-import datetime
+import strategies as ST
+
+
 """
 CREATE TABLE posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -15,47 +17,48 @@ CREATE TABLE posts (
 );
 """
 
+
 quater_id = 32
 half_id = 321
+
+TRADE_CLOSED = 1
+TRADE_NOT_CLOSED = 0
+TRADE_PLACED =1 
+TRADE_NOT_PLACED = 0
+TRADE_OPENED = 1
+TRADE_NOT_OPENED = 0
+
 
 def hedge(sym, dir):
     "implement hedging strategy"
 
-def update_depth(sym, id, depth):
-    """"""
-    
-def enter_half_cycle(sym, dir, size, strategy_type):
-    ""
-    # enter first position, get it's db id, update its depth when other positions get filled
-    ## hedging would probably rely on information from looking and analyzing past trade drawdowns in relation to itself, surroundings and outside forces
-    ## hedging - like an insurance or like an opportunistic trade? which approach?
-    ## as hedging in this case looks at the opposite direction, 
-    # #is our trade and our current position an insurance or an opportunity?
-    hedge(sym, dir)
-    if strategy_type == "minus_step_one_buy":
-        a = mq.order_buy(sym, size, half_id)
-        b = mq.order_buy(sym, size, half_id)
-        c = mq.order_sell(sym, size, quater_id)
-        if a != None and b != None and c != None:
-            DB.register_new_trade(sym,dir, b, created=datetime.time())
-        else:
-            print("ENTRY HALF CYCLE TRADE FAILED: ",a, b, c)
-
-def close_half_cycle(sym, dir, strategy_type):
-    # check if any trade remains and close it.
-
-    if strategy_type == "minus_step_one_buy":
-        mq.close_all()
-    DB.register_closing_position(sym, dir)
+def half_cycle_buy(sym, strategy_name):
+    "It was a sell signal entry so we register it's buy close using it original sell entry signal"
+    mq.close_all(sym, strategy_name)
+    DB.register_closed(sym, ST.SELL, strategy_name)
+    mq.order_buy(sym, ST.BUY, strategy_name)
+    DB.register_opened_without_listening(sym, ST.BUY, strategy_name)
 
 
-def halving_event(sym, size, strategy_type):
-    # if DB.check_halving(sym) == 0:
-    if strategy_type == "minus_step_one_buy":
-        mq.order_buy(sym, size, half_id)
-        mq.order_sell(sym, size/4, half_id)
-        mq.order_close_by_magic(sym, quater_id)
-        DB.record_halving(sym)
+def half_cycle_sell(sym, strategy_name):
+    mq.close_all(sym, strategy_name)
+    DB.register_closed(sym, ST.BUY, strategy_name)
+    mq.order_sell(sym, strategy_name)
+    DB.register_opened_without_listening(sym, ST.SELL, strategy_name)
+
+
+def cycle_buy(sym, strategy_name):
+    mq.close_all(sym, strategy_name)
+    DB.register_closed(sym, ST.SELL, strategy_name)
+    mq.order_buy(sym, ST.BUY, strategy_name)
+    DB.register_opened(sym=sym, signal=ST.BUY, strategy_name=strategy_name)
+
+
+def cycle_sell(sym, strategy_name):
+    mq.close_all(sym, strategy_name)
+    DB.register_closed(sym, ST.BUY, strategy_name)
+    mq.order_sell(sym, strategy_name)
+    DB.register_opened(sym=sym, signal=ST.SELL, strategy_name=strategy_name)
 
 
 # def close_first_step(dir, sym):
@@ -67,10 +70,10 @@ def halving_event(sym, size, strategy_type):
 # def shift_stoploss(dir, sym, step, entry_price):
 #     """
 #     calculations for shifting stop loss
-    
+
 #     """
 
-    
+
 # def update_position(dir, sym, step, entry_price):
 #     if step == 0:
 #         close_first_step(dir, sym)
