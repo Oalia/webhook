@@ -178,7 +178,7 @@ def close(sym, volume,magic_wanted, order_type, ticket, price):
         "type_filling": mt5.ORDER_FILLING_RETURN,
     }
     # print(close_request)
-    result=  mt5.Close(sym, ticket)
+    result=  mt5.Close(ticket)
     if result != None: 
         if result.retcode != mt5.TRADE_RETCODE_DONE:
             if result.retcode == 10027:
