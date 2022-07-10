@@ -94,6 +94,9 @@ def close_positons_by_symbol(symbol, strategy_name):
 
 def open_position(pair, order_type, strategy_name):
     size = calculate_lot()
+    if size == None:
+        print("account too small to maintain margin")
+        return None
     symbol_info = mt5.symbol_info(pair)
     if symbol_info is None:
         print(pair, "not found")
