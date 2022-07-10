@@ -36,7 +36,7 @@ def half_cycle_buy(sym, strategy_name):
     "It was a sell signal entry so we register it's buy close using it original sell entry signal"
     mq.close_all(sym, strategy_name)
     DB.register_closed(sym, ST.SELL, strategy_name)
-    mq.order_buy(sym, ST.BUY, strategy_name)
+    mq.order_buy(sym, strategy_name)
     DB.register_opened_without_listening(sym, ST.BUY, strategy_name)
 
 
