@@ -101,11 +101,6 @@ def order_sell(symbol="USDJPY", lot=0.01, magic_id=0000):
     # point = mt5.symbol_info(symbol).point
     price = mt5.symbol_info_tick(symbol).bid
     deviation = 20
-    """
-    !caution: actually removed stop loss and take profit
-        "sl": price - 100 * point,
-        "tp": price + 100 * point,
-    """
     request = {
         "action": mt5.TRADE_ACTION_PENDING,
         "symbol": symbol,
@@ -132,74 +127,86 @@ def order_sell(symbol="USDJPY", lot=0.01, magic_id=0000):
     return price
 
 
-def close_all(sym=""):
-    check_closed = []
-
-    all_positions = mt5.positions_get(symbol=sym)
-    if all_positions == None:
-        print("No positions found to close")
-    elif len(all_positions) > 0:
-        df = pd.DataFrame(list(all_positions),
-                          columns=all_positions[0]._asdict().keys())
-        print(df[0:])
-        bid =mt5.symbol_info_tick(sym).bid
-        ask =mt5.symbol_info_tick(sym).ask
-        for _, row in df.iterrows():
-            # print(row)
-            if sym == "":
-                sym = row['symbol']
-            if row['type'] == 1 :  #current a short, buy to close.
-                check_closed.append(
-                    close(symbol =sym,
-                          volume=row['volume'],
-                          magic_wanted=row['magic'],
-                          order_type=mt5.ORDER_TYPE_BUY_LIMIT,
-                          ticket=row['ticket'],
-                          price=ask))
-            if row['type'] == 0:  #long, sell to close
-                check_closed.append(
-                    close(symbol=sym,
-                          volume=row['volume'],
-                          magic_wanted=row['magic'],
-                          order_type=mt5.ORDER_TYPE_SELL_LIMIT,
-                          ticket=row['ticket'],
-                          price = bid))
-    print(check_closed[0])
-
-
-def close(symbol, volume, magic_wanted, order_type, ticket, price):
-    """"""
-    close_request = {
-        "action": mt5.TRADE_ACTION_PENDING,
-        "symbol": symbol,
-        "volume": volume,
-        "type": order_type,
-        "position": ticket,
-        "price": price,
-        "deviation": 20,
-        "magic": magic_wanted,
-        "comment": "python close",
-        "type_time": mt5.ORDER_TIME_GTC,  # good till cancelled
-        "type_filling": mt5.ORDER_FILLING_RETURN,
-    }
-    return mt5.order_send(close_request)
-
 
 def order_close_by_magic(sym, magic_wanted):
-    all_positions = mt5.positions_get(symbol=sym)
-    if all_positions == None:
-        print("No symbol found close magic")
-    elif len(all_positions) > 0:
-        df = pd.DataFrame(list(all_positions),
-                          columns=all_positions[0]._asdict().keys())
-        for _, row in df.iterrows():
-            if row['magic'] == magic_wanted:
-                # if row['type'] == 0:
-                close(sym, row['ticket'])
-                # row['volume'], magic_wanted, mt5.ORDER_TYPE_SELL_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).bid)
-                # else:
-                #     close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_BUY_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).ask)
+    close_positons_by_symbol_or_magic(magic_wanted)
+    # all_positions = mt5.positions_get(symbol=sym)
+    # if all_positions == None:
+    #     print("No symbol found close magic")
+    # elif len(all_positions) > 0:
+    #     df = pd.DataFrame(list(all_positions),
+    #                       columns=all_positions[0]._asdict().keys())
+    #     for _, row in df.iterrows():
+    #         if row['magic'] == magic_wanted:
+    #             # if row['type'] == 0:
+    #             close(sym, row['ticket'])
+    #             # row['volume'], magic_wanted, mt5.ORDER_TYPE_SELL_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).bid)
+    #             # else:
+    #             #     close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_BUY_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).ask)
 
 
 def shutdown():
     mt5.shutdown()
+
+
+def positions_get(symbol=None, magic=None):
+    """source: https://www.conorjohanlon.com/close-a-trade-with-mt5-using-python/"""
+    if (symbol is None and magic is None):
+        res = mt5.positions_get()
+    else:
+        if (symbol is not None):
+            res = mt5.positions_get(symbol=symbol)
+        elif (magic is not None):
+            res = mt5.positions_get(magic=magic)
+
+    if (res is not None and res != ()):
+        df = pd.DataFrame(list(res), columns=res[0]._asdict().keys())
+        df['time'] = pd.to_datetime(df['time'], unit='s')
+        return df
+
+    return pd.DataFrame()
+
+
+def close_position(deal_id):
+    """source: https://www.conorjohanlon.com/close-a-trade-with-mt5-using-python/"""
+    open_positions = positions_get()
+    open_positions = open_positions[open_positions['ticket'] == deal_id]
+    order_type = open_positions["type"].iloc[0]
+    symbol = open_positions['symbol'].iloc[0]
+    volume = open_positions['volume'].iloc[0]
+
+    if (order_type == mt5.ORDER_TYPE_BUY):
+        order_type = mt5.ORDER_TYPE_SELL
+        price = mt5.symbol_info_tick(symbol).bid
+    else:
+        order_type = mt5.ORDER_TYPE_BUY
+        price = mt5.symbol_info_tick(symbol).ask
+
+    close_request = {
+        "action": mt5.TRADE_ACTION_DEAL,
+        "symbol": symbol,
+        "volume": float(volume),
+        "type": order_type,
+        "position": deal_id,
+        "price": price,
+        "magic": 234000,
+        "comment": "Close trade",
+        "type_time": mt5.ORDER_TIME_GTC,
+        "type_filling": mt5.ORDER_FILLING_IOC,
+    }
+
+    result = mt5.order_send(close_request)
+
+    if result.retcode != mt5.TRADE_RETCODE_DONE:
+        print("Failed to close order :(")
+    else:
+        print("Order successfully closed!")
+
+
+def close_positons_by_symbol_or_magic(symbol=None, magic=None):
+    """source: https://www.conorjohanlon.com/close-a-trade-with-mt5-using-python/"""
+    if symbol is None and magic is not None:
+        open_positions = positions_get(magic =magic)
+    elif symbol is not None and magic is None:
+        open_positions = positions_get(symbol=symbol)
+    open_positions['ticket'].apply(lambda x: close_position(x))

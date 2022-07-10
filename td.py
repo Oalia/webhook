@@ -1,3 +1,4 @@
+import time
 from db  import db as DB
 from mql5python import mq5_python as mq
 import datetime
@@ -40,12 +41,23 @@ def enter_half_cycle(sym, dir, size, strategy_type):
             DB.register_new_trade(sym,dir, b, created=datetime.time())
         else:
             print("ENTRY HALF CYCLE TRADE FAILED: ",a, b, c)
+            while a == None:
+                mq.order_buy(sym, size, half_id)
+                time.sleep(6)
+            while b == None:
+                mq.order_buy(sym, size, half_id)
+                time.sleep(6)
+            while c == None:
+                mq.order_buy(sym, size, half_id)
+                time.sleep(6)
+            print("ENTRY HALF CYCLE TRADE FAILED: ",a, b, c)
+            DB.register_new_trade(sym,dir, b, created=datetime.time())
 
 def close_half_cycle(sym, dir, strategy_type):
     # check if any trade remains and close it.
 
     if strategy_type == "minus_step_one_buy":
-        mq.close_all(sym)
+        mq.close_positons_by_symbol_or_magic(symbol=sym)
     DB.register_closing_position(sym, dir)
 
 
