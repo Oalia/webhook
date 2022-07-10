@@ -102,7 +102,7 @@ def register_opened(sym, signal, strategy_name):
     id=x.fetchone()[0]
     s = '''UPDATE {0} 
             SET opened={1} 
-            WHERE ID={2} AND signal={3}'''.format(sym, str(1), str(id), str(signal))
+            WHERE ID={2}'''.format(sym, str(1), str(id))
     print(s)
     curr.execute(s)
     conn.commit()
@@ -123,10 +123,11 @@ def register_closed(sym, signal, db_path):
     curr = conn.cursor()
     x=curr.execute('''select MAX(ID) from {0};'''.format(sym))
     id=x.fetchone()[0]
+    print(signal)
     if id != None:
         s = '''UPDATE {0} 
                 SET closed={1} 
-                WHERE ID={2} AND signal={3}'''.format(sym, str(1), str(id), str(signal))
+                WHERE ID={2}'''.format(sym, str(1), str(id))
         print(s)
         curr.execute(s)
         conn.commit()

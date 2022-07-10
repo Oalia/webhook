@@ -29,7 +29,7 @@ def strategy_step(sym, signal, type):
         current_trade = DB.get_current_trade(sym, strategy_name)
         if current_trade != None:
                 cur_dir = current_trade['signal']
-                if cur_dir != signal: # if trade direction has changed.
+                if cur_dir == signal: # if trade direction has changed.
                     if str(current_trade['opened']) == TD.TRADE_NOT_OPENED:
                         # TODO: 
                         critical_error("trade not placed amidst direction change") 
@@ -39,7 +39,7 @@ def strategy_step(sym, signal, type):
                         elif signal == ST.SELL:
                             TD.half_cycle_buy(sym, strategy_name)
                 else:
-                    "do nothing for now, HODL, touch some grass, get some bitches"
+                    print("do nothing for now, HODL, touch some, get some")
         else:
             if signal == ST.BUY:
                 TD.half_cycle_sell(sym, strategy_name)
@@ -52,7 +52,7 @@ def strategy_chill(sym, signal, type):
         current_trade = DB.get_current_trade(sym, strategy_name)
         if current_trade != None:
                 cur_dir = current_trade['signal']
-                if cur_dir != signal: # if trade direction has changed.
+                if cur_dir == signal: # if trade direction has changed.
                     if str(current_trade['opened']) == TD.TRADE_NOT_OPENED:
                         # TODO: 
                         critical_error("trade not placed amidst direction change") 
@@ -62,7 +62,7 @@ def strategy_chill(sym, signal, type):
                         elif signal == ST.SELL:
                             DB.listen_for(ST.BUY, sym, strategy_name)
                 else:
-                    "do nothing for now"
+                    print("do nothing for now")
         else:
             if signal == ST.BUY:
                 DB.listen_for(ST.SELL, sym, strategy_name)
@@ -79,7 +79,7 @@ def strategy_chill(sym, signal, type):
                 if cur_dir == signal:
                     if signal == ST.BUY:
                         TD.cycle_buy(sym, strategy_name)
-                    elif dir == ST.SELL:
+                    elif signal == ST.SELL:
                         TD.cycle_sell(sym, strategy_name)
 
 
@@ -92,14 +92,14 @@ def webhook():
     signal = msg[0]
     # size = double(msg[1])/10
 
-    lg = ST.login_details(ST.minus_step)
-    print(lg['name'], lg['server'], lg['key'] )
-    mq.initialize(login=lg['name'], server=lg['server'], password=lg['key'])
-    strategy_step(sym, signal, type)
-    mq.shutdown()
+    # lg = ST.login_details(ST.minus_step)
+    # print("step\n")
+    # mq.initialize(login=lg['name'], server=lg['server'], password=lg['key'])
+    # strategy_step(sym, signal, type)
+    # mq.shutdown()
 
     lg = ST.login_details(ST.chill_a_little)
-    print(lg['name'], lg['server'], lg['key'] )
+    print("chill\n")
     mq.initialize(login=lg['name'], server=lg['server'], password=lg['key'])
     strategy_chill(sym, signal, type)
     mq.shutdown()

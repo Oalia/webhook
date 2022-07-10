@@ -22,7 +22,7 @@ def initialize(login, server, password, path=path):
 
 def calculate_lot(strategy_name):
     """"""
-    return 100
+    return 2          
 
 def order_buy(symbol, strategy_name):
     lot = calculate_lot(strategy_name)
@@ -108,11 +108,12 @@ def order_sell(symbol, strategy_name):
     }
     
     result = mt5.order_send(request)
-    print("order_sell: 1. order_sell(): by {} {} lots at {} with deviation={} points".format(symbol,lot,price,deviation));
-    if result.retcode != mt5.TRADE_RETCODE_DONE:
-        print("order_sell: 2. order_sell failed, retcode={}".format(result.retcode))
-        return None
-        # request the result as a dictionary and display it element by element
+    print("order_to_sell: 1. order_sell(): by {} {} lots at {} with deviation={} points".format(symbol,lot,price,deviation));
+    if result != None: 
+        if result.retcode != mt5.TRADE_RETCODE_DONE:
+            print("order_sell: 2. order_sell failed, retcode={}".format(result.retcode))
+            return None
+            # request the result as a dictionary and display it element by element
     # TODO might want to email or text responsible person about the order results.
     return price
 
