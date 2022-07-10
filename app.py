@@ -7,7 +7,7 @@ from db import db as DB
 import td as TD
 from mql5python import mq5_python as mq
 import strategies as ST
-
+import util as UT
 
 
 app = Flask(__name__)
@@ -20,8 +20,6 @@ def index():
     conn.close()
     return render_template('index.html', posts=posts)
 
-def critical_error(str):
-    print(str)
 
 def strategy_step(sym, signal, type):
     strategy_name = ST.minus_step
@@ -32,7 +30,7 @@ def strategy_step(sym, signal, type):
                 if cur_dir == signal: # if trade direction has changed.
                     if str(current_trade['opened']) == TD.TRADE_NOT_OPENED:
                         # TODO: 
-                        critical_error("trade not placed amidst direction change") 
+                        UT.critical_error("trade not placed amidst direction change") 
                     else:
                         if signal == ST.BUY:
                             print("st: heading to sells")
@@ -59,7 +57,7 @@ def strategy_chill(sym, signal, type):
                 if cur_dir == signal: # if trade direction has changed.
                     if str(current_trade['opened']) == TD.TRADE_NOT_OPENED:
                         # TODO: 
-                        critical_error("trade not placed amidst direction change") 
+                        UT.critical_error("trade not placed amidst direction change") 
                     else:
                         if signal == ST.BUY:
                             print("ch: listening for sells")

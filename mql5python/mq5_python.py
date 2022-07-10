@@ -3,6 +3,7 @@ import MetaTrader5 as mt5
 import pandas as pd
 from db import db as DB
 import strategies as ST
+import util as UT
 
 
 path = "C:/Program Files/MetaTrader 5/terminal64.exe"
@@ -29,7 +30,7 @@ def calculate_lot(strategy_name):
             print("good balance {}", balance)
             return balance / 20000
         else:
-            print("too little balance {}", balance)
+            UT.critical_error("too little balance {}".format(balance))
             return None
     else:
         print("account info is empty")
@@ -79,6 +80,8 @@ def order_buy(symbol, strategy_name):
     print("order_buy: 1. order_send(): by {} {} lots at {} with deviation={} points".format(symbol,lot,price,deviation));
     if result != None: 
         if result.retcode != mt5.TRADE_RETCODE_DONE:
+            if result.retcode == 10027:
+                UT.critical_error("Autotrading disabled")
             print("order_buy: 2. order_send failed, retcode={}".format(result.retcode))
             return None
             # request the result as a dictionary and display it element by element
@@ -127,6 +130,8 @@ def order_sell(symbol, strategy_name):
     print("order_to_sell: 1. order_sell(): by {} {} lots at {} with deviation={} points".format(symbol,lot,price,deviation));
     if result != None: 
         if result.retcode != mt5.TRADE_RETCODE_DONE:
+            if result.retcode == 10027:
+                UT.critical_error("Autotrading disabled")
             print("order_sell: 2. order_sell failed, retcode={}".format(result.retcode))
             return None
             # request the result as a dictionary and display it element by element
@@ -171,7 +176,13 @@ def close(sym, volume,magic_wanted, order_type, ticket, price):
     }
     # print(close_request)
     close_order=  mt5.Close(sym, ticket)
-    print(close_order)
+    if close_order != None: 
+        if close_order.retcode != mt5.TRADE_RETCODE_DONE:
+            if close_order.retcode == 10027:
+                UT.critical_error("Autotrading disabled")
+            print("order_sell: 2. order_sell failed, retcode={}".format(close_order.retcode))
+            return None
+    # print(close_order)
     return close_order
 
 def shutdown():
