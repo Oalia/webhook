@@ -35,15 +35,19 @@ def strategy_step(sym, signal, type):
                         critical_error("trade not placed amidst direction change") 
                     else:
                         if signal == ST.BUY:
+                            print("st: heading to sells")
                             TD.half_cycle_sell(sym, strategy_name)
                         elif signal == ST.SELL:
+                            print("st: heading to buys")
                             TD.half_cycle_buy(sym, strategy_name)
                 else:
-                    print("do nothing for now, HODL, touch some, get some")
+                    print("st: alarm, HODL, hedge? do nothing for now, HODL, smile, trust the process hahaha, don't get wrecked, touch some, get some")
         else:
             if signal == ST.BUY:
+                print("st: heading to sells")
                 TD.half_cycle_sell(sym, strategy_name)
             elif signal == ST.SELL:
+                print("st: heading to buys")
                 TD.half_cycle_buy(sym, strategy_name)  
 
 def strategy_chill(sym, signal, type):
@@ -58,15 +62,19 @@ def strategy_chill(sym, signal, type):
                         critical_error("trade not placed amidst direction change") 
                     else:
                         if signal == ST.BUY:
+                            print("ch: listening for sells")
                             DB.listen_for(ST.SELL, sym, strategy_name)
                         elif signal == ST.SELL:
+                            print("ch: listening for buys")
                             DB.listen_for(ST.BUY, sym, strategy_name)
                 else:
-                    print("do nothing for now")
+                    print("ch: do nothing for now")
         else:
             if signal == ST.BUY:
+                print("ch: listening for sells")
                 DB.listen_for(ST.SELL, sym, strategy_name)
             elif signal == ST.SELL:
+                print("ch: listening for buys")
                 DB.listen_for(ST.BUY, sym, strategy_name)
                 
     elif type == "small":
@@ -78,9 +86,13 @@ def strategy_chill(sym, signal, type):
                 cur_dir = current_trade['signal']
                 if cur_dir == signal:
                     if signal == ST.BUY:
+                        print("ch: confirmed for buys")
                         TD.cycle_buy(sym, strategy_name)
                     elif signal == ST.SELL:
+                        print("ch: confirmed for sells")
                         TD.cycle_sell(sym, strategy_name)
+            else: 
+                print("ch: trade already placed.")
 
 
 @app.route('/webhooks', methods=['POST'])
