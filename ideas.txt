@@ -2,12 +2,10 @@
 # def webhook():
 #     if request.method == 'POST':
 #         print("hello webhook")
-
 #         webhook_msg = json.loads(request.data)
 #         # ticker = webhook_msg['ticker']
 #         # time = webhook_msg['time']
 #         # volume = webhook_msg['bar']['volume']
-        
 #         print(webhook_msg)
 #         return 'success', 200
 #     else:
@@ -77,3 +75,61 @@ def update_depth(sym, id, depth):
 #         mq.order_sell(sym, size/4, half_id)
 #         mq.order_close_by_magic(sym, quater_id)
 #         DB.record_halving(sym)
+
+
+
+
+# def close_first_step(dir, sym):
+#     """"""
+# def close_second_step(dir, sym):
+#     """"""
+
+# def shift_stoploss(dir, sym, step, entry_price):
+#     """
+#     calculations for shifting stop loss
+#     """
+
+
+# def update_position(dir, sym, step, entry_price):
+#     if step == 0:
+#         close_first_step(dir, sym)
+#     if step == 1:
+#         close_second_step(dir, sym)
+#     else:
+#         shift_stoploss(dir, sym, step, entry_price)
+#     DB.update_step(sym,dir)
+
+
+# def order_close_by_magic(sym, magic_wanted):
+#     all_positions = mt5.positions_get(symbol=sym)
+#     if all_positions==None:
+#         """"""
+#     elif len(all_positions)>0:
+#         df=pd.DataFrame(list(all_positions),columns=all_positions[0]._asdict().keys())
+#         for _, row in df.iterrows():
+#             if row['magic'] == magic_wanted:
+#                 if row['type'] == 0:
+#                     close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_SELL_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).bid)
+#                 else:
+#                     close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_BUY_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).ask)
+
+
+
+# def edit_trade(id):
+#     post = get_current_trade(id)
+#     if request.method == 'POST':
+#         title = request.form['title']
+#         content = request.form['content']
+#         if not title:
+#             flash('Title is required!')
+#         elif not content:
+#             flash('Content is required!')
+#         else:
+#             conn = get_db_connection()
+#             conn.execute('UPDATE {posts} SET title = ?, content = ?'
+#                          ' WHERE id = ?',
+#                          (title, content, id))
+#             conn.commit()
+#             conn.close()
+#             return redirect(url_for('index'))
+#     return render_template('edit.html', post=post)

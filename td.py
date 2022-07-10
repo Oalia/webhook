@@ -59,27 +59,3 @@ def cycle_sell(sym, strategy_name):
     DB.register_closed(sym, ST.BUY, strategy_name)
     mq.order_sell(sym, strategy_name)
     DB.register_opened(sym=sym, signal=ST.SELL, strategy_name=strategy_name)
-
-
-# def close_first_step(dir, sym):
-#     """"""
-
-# def close_second_step(dir, sym):
-#     """"""
-
-# def shift_stoploss(dir, sym, step, entry_price):
-#     """
-#     calculations for shifting stop loss
-
-#     """
-
-
-# def update_position(dir, sym, step, entry_price):
-#     if step == 0:
-#         close_first_step(dir, sym)
-#     if step == 1:
-#         close_second_step(dir, sym)
-#     else:
-#         shift_stoploss(dir, sym, step, entry_price)
-
-#     DB.update_step(sym,dir)

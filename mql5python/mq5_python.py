@@ -4,32 +4,16 @@ import pandas as pd
 from db import db as DB
 import strategies as ST
 
-# name = 50901624
-# key = "9qeEYbCF"
-# serv = "ICMarketsSC-Demo"
+
 path = "C:/Program Files/MetaTrader 5/terminal64.exe"
-lot = 0.02
 
-name = 50902855
-key = "eXG8GpQ4"
-serv = "ICMarketsSC-Demo"
-#  path,                     // path to the MetaTrader 5 terminal EXE file
-#    login=LOGIN,              // account number
-#    password="PASSWORD",      // password
-#    server="SERVER",          // server name as it is specified in the terminal
-#    timeout=TIMEOUT,          // timeout
-#    portable=False   
-
-
-
-
-def account_login(login = name,password=key, server= serv,):
+def account_login(login,password, server):
     if mt5.login(login,password,server):
         print("logged in succesffully")
     else: 
         print("login failed, error code: {}".format(mt5.last_error()))
 
-def initialize(login = name, server=serv, password=key, path=path):
+def initialize(login, server, password, path=path):
     
     if not mt5.initialize(path):
         print("Initialization failed, error code {}", mt5.last_error())
@@ -172,20 +156,6 @@ def close(sym, volume,magic_wanted, order_type, ticket, price):
     close_order=  mt5.Close(sym, ticket)
     print(close_order)
     return close_order
-
-# def order_close_by_magic(sym, magic_wanted):
-#     all_positions = mt5.positions_get(symbol=sym)
-#     if all_positions==None:
-#         """"""
-#     elif len(all_positions)>0:
-#         df=pd.DataFrame(list(all_positions),columns=all_positions[0]._asdict().keys())
-#         for _, row in df.iterrows():
-#             if row['magic'] == magic_wanted:
-#                 if row['type'] == 0:
-#                     close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_SELL_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).bid)
-#                 else:
-#                     close(sym, row['volume'], magic_wanted, mt5.ORDER_TYPE_BUY_LIMIT,row['ticket'], mt5.symbol_info_tick(sym).ask)
-
 
 def shutdown():
     mt5.shutdown()

@@ -8,7 +8,6 @@ SELL = "sell"
 magic_numbers = {chill_a_little: 1, minus_step: 2}
 
 def login_details(strategy):
-
     if strategy == chill_a_little:
         return {"name": 50902855, "key": "eXG8GpQ4", "server": "ICMarketsSC-Demo"}
     if strategy == minus_step:
