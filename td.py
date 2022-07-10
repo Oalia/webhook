@@ -36,26 +36,26 @@ def half_cycle_buy(sym, strategy_name):
     "It was a sell signal entry so we register it's buy close using it original sell entry signal"
     mq.close_all(sym, strategy_name)
     DB.register_closed(sym, ST.SELL, strategy_name)
-    mq.order_buy(sym, strategy_name)
-    DB.register_opened_without_listening(sym, ST.BUY, strategy_name)
+    if(mq.order_buy(sym, strategy_name)):
+        DB.register_opened_without_listening(sym, ST.BUY, strategy_name)
 
 
 def half_cycle_sell(sym, strategy_name):
     mq.close_all(sym, strategy_name)
     DB.register_closed(sym, ST.BUY, strategy_name)
-    mq.order_sell(sym, strategy_name)
-    DB.register_opened_without_listening(sym, ST.SELL, strategy_name)
+    if(mq.order_sell(sym, strategy_name)):
+        DB.register_opened_without_listening(sym, ST.SELL, strategy_name)
 
 
 def cycle_buy(sym, strategy_name):
     mq.close_all(sym, strategy_name)
     DB.register_closed(sym, ST.SELL, strategy_name)
-    mq.order_buy(sym, strategy_name)
-    DB.register_opened(sym=sym, signal=ST.BUY, strategy_name=strategy_name)
+    if(mq.order_buy(sym, strategy_name)):
+        DB.register_opened(sym=sym, signal=ST.BUY, strategy_name=strategy_name)
 
 
 def cycle_sell(sym, strategy_name):
     mq.close_all(sym, strategy_name)
     DB.register_closed(sym, ST.BUY, strategy_name)
-    mq.order_sell(sym, strategy_name)
-    DB.register_opened(sym=sym, signal=ST.SELL, strategy_name=strategy_name)
+    if(mq.order_sell(sym, strategy_name)):
+        DB.register_opened(sym=sym, signal=ST.SELL, strategy_name=strategy_name)

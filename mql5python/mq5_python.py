@@ -41,21 +41,21 @@ def calculate_lot(strategy_name):
 def order_buy(symbol, strategy_name):
     lot = calculate_lot(strategy_name)
     if lot == None:
-        return None
+        return False
     magic_number = ST.magic_numbers[strategy_name]
 
     symbol_info = mt5.symbol_info(symbol)
     if symbol_info is None:
         print(symbol, "order_buy: not found, can not call order_check()")
         mt5.shutdown()
-        quit()
+        return False
     
     if not symbol_info.visible:
         print(symbol, "order_buy: is not visible, trying to switch on")
         if not mt5.symbol_select(symbol,True):
             print("order_buy: symbol_select({}}) failed, exit",symbol)
             mt5.shutdown()
-            quit()
+            return False
     
     price = mt5.symbol_info_tick(symbol).ask
     deviation = 20
@@ -82,11 +82,12 @@ def order_buy(symbol, strategy_name):
         if result.retcode != mt5.TRADE_RETCODE_DONE:
             if result.retcode == 10027:
                 UT.critical_error("Autotrading disabled")
-            print("order_buy: 2. order_send failed, retcode={}".format(result.retcode))
-            return None
+            print("order_buy: order_send failed, retcode={}".format(result.retcode))
+            return False
             # request the result as a dictionary and display it element by element
-    # TODO might want to email or text responsible person about the order results.
-    return price
+        else: 
+            return True
+    return False
 
 def order_sell(symbol, strategy_name):
     lot = calculate_lot(strategy_name)
@@ -96,14 +97,15 @@ def order_sell(symbol, strategy_name):
     if symbol_info is None:
         print(symbol, "order_sell: not found, can not call order_check()")
         mt5.shutdown()
-        quit()
+        return False
+
     
     if not symbol_info.visible:
         print(symbol, "order_sell: is not visible, trying to switch on")
         if not mt5.symbol_select(symbol,True):
             print("order_sell: symbol_select({}}) failed, exit",symbol)
             mt5.shutdown()
-            quit()
+            return False
     
     # point = mt5.symbol_info(symbol).point
     price = mt5.symbol_info_tick(symbol).bid
@@ -132,11 +134,12 @@ def order_sell(symbol, strategy_name):
         if result.retcode != mt5.TRADE_RETCODE_DONE:
             if result.retcode == 10027:
                 UT.critical_error("Autotrading disabled")
-            print("order_sell: 2. order_sell failed, retcode={}".format(result.retcode))
-            return None
+            print("order_sell: order_send failed, retcode={}".format(result.retcode))
+            return False
             # request the result as a dictionary and display it element by element
-    # TODO might want to email or text responsible person about the order results.
-    return price
+        else: 
+            return True
+    return False
 
 def close_all(sym, strategy_name):
     check_closed = []
