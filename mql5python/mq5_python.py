@@ -28,7 +28,7 @@ def calculate_lot(strategy_name):
         balance = account_info._asdict()['balance']
         if balance > 2000:
             print("good balance {}", balance)
-            return balance / 20000
+            return round(balance / 20000, 2)
         else:
             UT.critical_error("too little balance {}".format(balance))
             return None
