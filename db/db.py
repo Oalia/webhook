@@ -69,7 +69,7 @@ def update_step(sym, dir, db_path):
     s = '''UPDATE {0} 
             SET step={1} 
             WHERE ID={2}'''.format(sym, int(symbol_table['step'])+1, str(id))
-    print(s)
+    # print(s)
     curr.execute(s)
     conn.commit()
     conn.close()
@@ -103,7 +103,7 @@ def register_opened(sym, signal, strategy_name):
     s = '''UPDATE {0} 
             SET opened={1} 
             WHERE ID={2}'''.format(sym, str(1), str(id))
-    print(s)
+    # print(s)
     curr.execute(s)
     conn.commit()
     conn.close()
@@ -128,7 +128,7 @@ def register_closed(sym, signal, db_path):
         s = '''UPDATE {0} 
                 SET closed={1} 
                 WHERE ID={2}'''.format(sym, str(1), str(int(id)-1))
-        print(s)
+        # print(s)
         curr.execute(s)
         conn.commit()
         conn.close()
