@@ -147,7 +147,7 @@ def close_all(sym, strategy_name):
 
     all_positions = mt5.positions_get(symbol=sym)
     if all_positions==None:
-        """"""
+        print("no current position")
     elif len(all_positions)>0:
         df=pd.DataFrame(list(all_positions),columns=all_positions[0]._asdict().keys())
         for _, row in df.iterrows():
