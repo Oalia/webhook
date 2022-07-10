@@ -123,7 +123,6 @@ def register_closed(sym, signal, db_path):
     curr = conn.cursor()
     x=curr.execute('''select MAX(ID) from {0};'''.format(sym))
     id=x.fetchone()[0]
-    print(signal)
     if id != None:
         s = '''UPDATE {0} 
                 SET closed={1} 

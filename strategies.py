@@ -11,5 +11,10 @@ def login_details(strategy):
     if strategy == chill_a_little:
         return {"name": 50902855, "key": "eXG8GpQ4", "server": "ICMarketsSC-Demo"}
     if strategy == minus_step:
-        return {"name": 50901624, "key": "9qeEYbCF", "server": "ICMarketsSC-Demo"}
+        return {"name": 50907817, "key": "Exq2tzwa", "server": "ICMarketsSC-Demo"}
 
+
+
+
+
+# {"name": 50901624, "key": "9qeEYbCF", "server": "ICMarketsSC-Demo"} former step
