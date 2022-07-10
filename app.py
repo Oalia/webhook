@@ -93,11 +93,13 @@ def webhook():
     # size = double(msg[1])/10
 
     lg = ST.login_details(ST.minus_step)
+    print(lg['name'], lg['server'], lg['key'] )
     mq.initialize(login=lg['name'], server=lg['server'], password=lg['key'])
     strategy_step(sym, signal, type)
     mq.shutdown()
 
     lg = ST.login_details(ST.chill_a_little)
+    print(lg['name'], lg['server'], lg['key'] )
     mq.initialize(login=lg['name'], server=lg['server'], password=lg['key'])
     strategy_chill(sym, signal, type)
     mq.shutdown()
