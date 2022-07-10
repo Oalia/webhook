@@ -50,7 +50,7 @@ def half_cycle_sell(sym, strategy_name):
 def cycle_buy(sym, strategy_name):
     mq.close_all(sym, strategy_name)
     DB.register_closed(sym, ST.SELL, strategy_name)
-    mq.order_buy(sym, ST.BUY, strategy_name)
+    mq.order_buy(sym, strategy_name)
     DB.register_opened(sym=sym, signal=ST.BUY, strategy_name=strategy_name)
 
 
