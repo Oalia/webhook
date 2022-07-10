@@ -1,4 +1,5 @@
 from time import time
+from types import NoneType
 import MetaTrader5 as mt5
 import pandas as pd
 from db import db as DB
@@ -178,8 +179,8 @@ def close(sym, volume,magic_wanted, order_type, ticket, price):
         "type_filling": mt5.ORDER_FILLING_RETURN,
     }
     # print(close_request)
-    result=  mt5.Close(ticket)
-    if result != None: 
+    result =  mt5.Close(ticket)
+    if not result: 
         if result.retcode != mt5.TRADE_RETCODE_DONE:
             if result.retcode == 10027:
                 UT.critical_error("Autotrading disabled")
