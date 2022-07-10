@@ -42,9 +42,9 @@ def strategy_step(sym, signal, type):
                     "do nothing for now, HODL, touch some grass, get some bitches"
         else:
             if signal == ST.BUY:
-                TD.half_cycle_sell(sym, ST.SELL, strategy_name)
+                TD.half_cycle_sell(sym, strategy_name)
             elif signal == ST.SELL:
-                TD.half_cycle_buy(sym, ST.BUY, strategy_name)
+                TD.half_cycle_buy(sym, strategy_name)
 
 def strategy_chill(sym, signal, type):
     strategy_name = ST.chill_a_little
