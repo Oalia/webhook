@@ -44,7 +44,7 @@ def strategy_step(sym, signal, type):
             if signal == ST.BUY:
                 TD.half_cycle_sell(sym, strategy_name)
             elif signal == ST.SELL:
-                TD.half_cycle_buy(sym, strategy_name)
+                TD.half_cycle_buy(sym, strategy_name)  
 
 def strategy_chill(sym, signal, type):
     strategy_name = ST.chill_a_little
