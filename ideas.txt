@@ -133,3 +133,155 @@ def update_depth(sym, id, depth):
 #             conn.close()
 #             return redirect(url_for('index'))
 #     return render_template('edit.html', post=post)
+
+
+def order_buy(symbol, strategy_name):
+    return open_position(symbol, "BUY", strategy_name)
+
+    # lot = calculate_lot(strategy_name)
+    # if lot == None:
+    #     return False
+    # magic_number = ST.magic_numbers[strategy_name]
+
+    # symbol_info = mt5.symbol_info(symbol)
+    # if symbol_info is None:
+    #     print(symbol, "order_buy: not found, can not call order_check()")
+    #     mt5.shutdown()
+    #     return False
+    
+    # if not symbol_info.visible:
+    #     print(symbol, "order_buy: is not visible, trying to switch on")
+    #     if not mt5.symbol_select(symbol,True):
+    #         print("order_buy: symbol_select({}}) failed, exit",symbol)
+    #         mt5.shutdown()
+    #         return False
+    
+    # price = mt5.symbol_info_tick(symbol).ask
+    # deviation = 20
+    # """
+    # !caution: actually removed stop loss and take profit
+    #     "sl": price - 100 * point,
+    #     "tp": price + 100 * point,
+    # """
+    # request = {
+    #     "action": mt5.TRADE_ACTION_PENDING,
+    #     "symbol": symbol,
+    #     "volume": lot,
+    #     "type": mt5.ORDER_TYPE_BUY_LIMIT,
+    #     "price": price,
+    #     "deviation": deviation,
+    #     "magic": magic_number,
+    #     "comment": "python buy",
+    #     "type_time": mt5.ORDER_TIME_GTC,
+    #     "type_filling": mt5.ORDER_FILLING_RETURN,
+    # }
+    # result = mt5.order_send(request)
+    # print("order_buy: 1. order_send(): by {} {} lots at {} with deviation={} points".format(symbol,lot,price,deviation));
+    # if result != None: 
+    #     if result.retcode != mt5.TRADE_RETCODE_DONE:
+    #         if result.retcode == 10027:
+    #             UT.critical_error("Autotrading disabled")
+    #         print("order_buy: order_send failed, retcode={}".format(result.retcode))
+    #         return False
+    #         # request the result as a dictionary and display it element by element
+    #     else: 
+    #         return True
+    # return False
+
+def order_sell(symbol, strategy_name):
+    return open_position(symbol, "SELL", strategy_name)
+    # lot = calculate_lot(strategy_name)
+    # magic_number = ST.magic_numbers[strategy_name]
+
+    # symbol_info = mt5.symbol_info(symbol)
+    # if symbol_info is None:
+    #     print(symbol, "order_sell: not found, can not call order_check()")
+    #     mt5.shutdown()
+    #     return False
+
+    
+    # if not symbol_info.visible:
+    #     print(symbol, "order_sell: is not visible, trying to switch on")
+    #     if not mt5.symbol_select(symbol,True):
+    #         print("order_sell: symbol_select({}}) failed, exit",symbol)
+    #         mt5.shutdown()
+    #         return False
+    
+    # # point = mt5.symbol_info(symbol).point
+    # price = mt5.symbol_info_tick(symbol).bid
+    # deviation = 20
+    # """
+    # !caution: actually removed stop loss and take profit
+    #     "sl": price - 100 * point,
+    #     "tp": price + 100 * point,
+    # """
+    # request = {
+    #     "action": mt5.TRADE_ACTION_PENDING,
+    #     "symbol": symbol,
+    #     "volume": lot,
+    #     "type": mt5.ORDER_TYPE_SELL_LIMIT,
+    #     "price": price,
+    #     "deviation": deviation,
+    #     "magic": magic_number,
+    #     "comment": "python sell",
+    #     "type_time": mt5.ORDER_TIME_GTC,
+    #     "type_filling": mt5.ORDER_FILLING_RETURN,
+    # }
+    
+    # result = mt5.order_send(request)
+    # print("order_to_sell: 1. order_sell(): by {} {} lots at {} with deviation={} points".format(symbol,lot,price,deviation));
+    # if result != None: 
+    #     if result.retcode != mt5.TRADE_RETCODE_DONE:
+    #         if result.retcode == 10027:
+    #             UT.critical_error("Autotrading disabled")
+    #         print("order_sell: order_send failed, retcode={}".format(result.retcode))
+    #         return False
+    #         # request the result as a dictionary and display it element by element
+    #     else: 
+    #         return True
+    # return False
+
+# def close_all(sym, strategy_name):
+#     check_closed = []
+#     magic_number = ST.magic_numbers[strategy_name]
+
+#     all_positions = mt5.positions_get(symbol=sym)
+#     if all_positions==None:
+#         print("no current position")
+#     elif len(all_positions)>0:
+#         df=pd.DataFrame(list(all_positions),columns=all_positions[0]._asdict().keys())
+#         for _, row in df.iterrows():
+#             if row['magic'] == magic_number:
+#                 if sym == "":
+#                     sym=row['symbol']
+#                 if row['type'] == 0: #current a short, buy to close.
+#                    r =  close_request(row['type'], row['volume'], magic_number, mt5.ORDER_TYPE_BUY_LIMIT, row['ticket'], mt5.symbol_info_tick(sym).ask)
+#                 if row['type'] == 1:  #long, sell to close
+#                    r = close_request(sym, row['volume'], magic_number, mt5.ORDER_TYPE_SELL_LIMIT, row['ticket'], mt5.symbol_info_tick(sym).bid)
+#                 result =  mt5.order_send(close_request)
+#                 for _ in range(5):
+#                     if result != None: 
+#                         if result.retcode != mt5.TRADE_RETCODE_DONE:
+#                             result =  mt5.order_send(close_request)
+#                         else: 
+#                             print("closed")
+#                             break
+#                     else:
+#                         result =  mt5.order_send(close_request)
+                
+# def close_request(sym, volume,magic_wanted, order_type, ticket, price):
+#     """"""
+#     close_request={
+#         "action": mt5.TRADE_ACTION_CLOSE_BY,
+#         "symbol": sym,
+#         "volume": volume,
+#         "type": order_type,
+#         "position": ticket,
+#         "price": price,
+#         "deviation": 20,
+#         "magic": magic_wanted,
+#         "comment": "python close",
+#         "type_time": mt5.ORDER_TIME_GTC, # good till cancelled
+#         "type_filling": mt5.ORDER_FILLING_RETURN,
+#     }
+#     return close_request

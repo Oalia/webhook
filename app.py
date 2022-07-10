@@ -66,7 +66,7 @@ def strategy_chill(sym, signal, type):
                             print("ch: listening for buys")
                             DB.listen_for(ST.BUY, sym, strategy_name)
                 else:
-                    print("ch: do nothing for now")
+                    print("ch: big looking for value: hold")
         else:
             if signal == ST.BUY:
                 print("ch: listening for sells")
@@ -89,6 +89,8 @@ def strategy_chill(sym, signal, type):
                     elif signal == ST.SELL:
                         print("ch: confirmed for sells")
                         TD.cycle_sell(sym, strategy_name)
+                else:
+                    print("ch: small looking for value")
             else: 
                 print("ch: trade already placed.")
 
