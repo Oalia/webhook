@@ -62,10 +62,11 @@ def order_buy(symbol, strategy_name):
     }
     result = mt5.order_send(request)
     print("order_buy: 1. order_send(): by {} {} lots at {} with deviation={} points".format(symbol,lot,price,deviation));
-    if result.retcode != mt5.TRADE_RETCODE_DONE:
-        print("order_buy: 2. order_send failed, retcode={}".format(result.retcode))
-        return None
-        # request the result as a dictionary and display it element by element
+    if result != None: 
+        if result.retcode != mt5.TRADE_RETCODE_DONE:
+            print("order_buy: 2. order_send failed, retcode={}".format(result.retcode))
+            return None
+            # request the result as a dictionary and display it element by element
     # TODO might want to email or text responsible person about the order results.
     return price
 

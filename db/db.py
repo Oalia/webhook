@@ -127,7 +127,7 @@ def register_closed(sym, signal, db_path):
     if id != None:
         s = '''UPDATE {0} 
                 SET closed={1} 
-                WHERE ID={2}'''.format(sym, str(1), str(id))
+                WHERE ID={2}'''.format(sym, str(1), str(int(id)-1))
         print(s)
         curr.execute(s)
         conn.commit()
