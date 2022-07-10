@@ -22,10 +22,25 @@ def initialize(login, server, password, path=path):
 
 def calculate_lot(strategy_name):
     """"""
-    return 2          
+    account_info=mt5.account_info()
+    if account_info!=None:   
+        balance = account_info._asdict()['balance']
+        if balance > 2000:
+            print("good balance {}", balance)
+            return balance / 20000
+        else:
+            print("too little balance {}", balance)
+            return None
+    else:
+        print("account info is empty")
+        return None
+
+    
 
 def order_buy(symbol, strategy_name):
     lot = calculate_lot(strategy_name)
+    if lot == None:
+        return None
     magic_number = ST.magic_numbers[strategy_name]
 
     symbol_info = mt5.symbol_info(symbol)
