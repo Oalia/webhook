@@ -104,13 +104,13 @@ def webhook():
     signal = msg[0]
 
     lg = ST.login_details(ST.minus_step)
-    print("step\n")
+    print("step")
     mq.initialize(login=lg['name'], server=lg['server'], password=lg['key'])
     strategy_step(sym, signal, type)
     mq.shutdown()
 
     lg = ST.login_details(ST.chill_a_little)
-    print("chill\n")
+    print("chill")
     mq.initialize(login=lg['name'], server=lg['server'], password=lg['key'])
     strategy_chill(sym, signal, type)
     mq.shutdown()
