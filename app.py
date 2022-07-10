@@ -87,9 +87,9 @@ def strategy_chill(sym, signal, type):
 def webhook():
     webhook_message = (request.data)
     msg = webhook_message.decode(encoding='UTF-8').split(" ")
-    type = msg[3]
+    type = msg[2]
+    sym = msg[1]
     signal = msg[0]
-    sym = "AUDCHF"
     # size = double(msg[1])/10
 
     lg = ST.login_details(ST.minus_step)
